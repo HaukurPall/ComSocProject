@@ -16,26 +16,24 @@
 %\usepackage[margin=1in]{geometry}
 \usepackage{float}
 \usepackage{bm}
+\usepackage{color}
 
 \usepackage[normalem]{ulem}
 \date{}
 
 \begin{document}
 \maketitle
-Given a set of "voters"/readers $N$ a set of news items $A$ and a corresponding profile $R$ we want to fill a set of relevant alternatives $M$. We do this by iterating a resolute voting rule $F:\mathcal{L}(A)^n \rightarrow A$ $m$ times.\\
-
-Questions:\\
-- Which axioms should the relevant set $M$ fulfill and to which axioms on the voting rule F do they correspond?
-\section*{Introduction}
+\section{Introduction: Goal \& Motivation}
 Our project aims at better understanding of collective recommendation mechanisms in media settings. We want to use formal tools provided by Social Choice Theory to analyze benefits and drawbacks of various possible ways to determine a set of essential news items - eg. newspaper articles - for a group, given each member's individual preferences over the topics - eg. politics, sport, business - instantiated by the items.
 
 News consumers only have so much time and cognitive ressources at their disposal, yet receiving information through news requires both of these. At the same time, it is easy to see the desirability of people - as members in a community or citizens in a state- to be on the same page with respect to topics of high concern to other members. It is, therefore, important to get on understanding of how extract a common core of pieces of information from the dispersed interests and pet topics of individuals while, at the same, time respecting the constraints given by attention span and time.
 
-\begin{enumerate}
-\item Introduction: High-Level motivation. Media context
-\item Formal Details. Sequential Voting. 
-\item Possible avenues: Axiomatic \& Optimization Problem
-\end{enumerate}
+\section{Formal Model}
+The formal model we will base our anaylisis looks as follows:\\
+Given a set of voters/readers $N$ a set of candidates/news items $A$ and a corresponding profile $\mathbf{R}$ we want to fill a set of indispensable $M$. We do this by sequentially applying a resolute voting rule $F:\mathcal{L}(A)^n \rightarrow A$ for $|M|=m$ times. \textcolor{red}{For each step in the sequence we remove the previous step's winner. (Do we need to make this restriction already? there might be a voting rule that funny stuff when we do this)} This process is constrained by an attention budget $b\in \mathbb{R}_{\geq 0}$ for each player. Each item $a\in A$ is associated with a cost $c_a\in \mathbb{R_{\geq 0}}$ and if $M=\{a_1,...,a_m\}$ then $\sum_1^m a_i \leq b$. The cardinality of $M$ thus depends on the items' cost and the composition of $M$.
+
+\section{Avenues of Analysis} 
+There are two paths we want to explore to analyze  
 
 
 Material:
