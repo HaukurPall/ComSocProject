@@ -27,13 +27,27 @@ Given a set of "voters"/readers $N$ a set of news items $A$ and a corresponding 
 Questions:\\
 - Which axioms should the relevant set $M$ fulfill and to which axioms on the voting rule F do they correspond?
 \section*{Introduction}
+
+In recent political debate, the increasing fragmentation, partizanship and lack of a common factual base in the media is frequently lamented. We would like take a step towards solving this problem by designing a recommendation mechanism for news articles that unlike conventional approaches considers not only individual preferences but is based on an intersubjective relevance criterion. Namely, given a profile of individual preference orders, repeated application of a social choice function will be used fill a set of essential readings. This set should constitute a "common core" that we suggest should form a subset of any recommendation regardless of indivdual preferences.
+
 Our project aims at better understanding of collective recommendation mechanisms in media settings. We want to use formal tools provided by Social Choice Theory to analyze benefits and drawbacks of various possible ways to determine a set of essential news items - eg. newspaper articles - for a group, given each member's individual preferences over the topics - eg. politics, sport, business - instantiated by the items.
 
 News consumers only have so much time and cognitive ressources at their disposal, yet receiving information through news requires both of these. At the same time, it is easy to see the desirability of people - as members in a community or citizens in a state- to be on the same page with respect to topics of high concern to other members. It is, therefore, important to get on understanding of how extract a common core of pieces of information from the dispersed interests and pet topics of individuals while, at the same, time respecting the constraints given by attention span and time.
 
+\section{Getting Started}
+
+We have already started to line out the formal details of the intended mechanism. Namely, iven a set of readers $N$, a set of news items $A$ and a corresponding profile $R$ we would like to fill a set of essential readings $E$. We do this by applying a resolute voting rule $F:\mathcal{L}(A)^n \rightarrow A$ $m$ times, deleting the winner from the set of alternatives after each election.\\
+
+In addition we have performed a preliminary literature search. As a next step we will read and assess the relevance of this literature for our project. Especially (Skowron 2014) appears promising.
+
+
+
+
+need to further discuss the desiderata the essential readings should fulfil.
+
 \begin{enumerate}
 \item Introduction: High-Level motivation. Media context
-\item Formal Details. Sequential Voting. 
+\item Formal Details. Sequential Voting.
 \item Possible avenues: Axiomatic \& Optimization Problem
 \end{enumerate}
 
