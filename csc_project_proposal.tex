@@ -36,7 +36,7 @@
 \begin{document}
 \maketitle
 
-\section*{Introduction: Goal \& Motivation}
+\section{Introduction: Goal \& Motivation}
 
 In recent political debate, the increasing fragmentation, partizanship and lack of a common factual base in the media is frequently lamented. We would like take a step towards solving this problem by designing a recommendation mechanism for news articles that unlike conventional approaches considers not only individual preferences but is based on an intersubjective relevance criterion. Namely, given a profile of individual preference orders, repeated application of a social choice function will be used fill a set of essential readings. This set should constitute a "common core" that we suggest should form a subset of any recommendation regardless of indivdual preferences.
 
@@ -74,7 +74,6 @@ There are two paths we want to explore in terms of analysis:
 %Do we want to be a bit more specific about which axioms we think should be included? 
 We also hope to find some interaction between axiomatic choices at the level of SCF and $M$.
 \item Instead of taking the axiomatic approach we could view the problem as minimizing some sort of discrepancy between $M$ and what the readers' preferences are, while respecting the budget constraint. Intuitively, such a discrepancy would be captured by a metric that, to give an example, indicates high discrepancy if the unanimous top-priority in the profile is not present in $M$ and lower discrepancy if the unanimous bottom-priority is absent. Our problem then becomes the challenge of finding a voting rule that yields the subset of $A$ - $M$ that minimizes discrepancy while staying within the budget.
-\end{enumerate}
 \item Furthermore, we can compare the results of k-sequential voting and non-resolute voting rules which give K winners. Similarly as above we can compare the set $M$ given by each procedure using some discrepancy measure in order to evaluate the procedures. Additionally, we can compare the complexity of these two different procedures.
 >>>>>>> 927403a2e774b2bd0b13e44d0ad4396afb9d5779
 \end{enumerate}
