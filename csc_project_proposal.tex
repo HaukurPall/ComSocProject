@@ -5,7 +5,7 @@
 \author{
     Haukur J{\'o}nnson\\    \texttt{Haukur's email address}
     \and
-    Silvan Hungerb{\"u}hler\\   \texttt{Silvan's email address}
+    Silvan Hungerb{\"u}hler\\   \texttt{silvan.hungerbuehler@bluewin.ch}
     \and
     Grzegorz Lisowski\\  \texttt{grzegorz.adam.lisowski@gmail.com}
     \and
@@ -63,16 +63,19 @@ We should then proceed to further discuss and formally define the desiderata the
 % The problem I saw with the version below is this: Voters only have preferences over topics but we want the outcome to be an article. We can make hard restrictions to this, f.ex. an article is only based on one topic and we have a article representing each topic in I.
 %Grzesiek's comment:
 %In this fragment you say that an attention budget is agent dependent. I thought we were talking about an budget? If we do not stipulate something like that our model indeed becomes more socially plausible, but on the other hand it would make it harder for us to model as we would probably need to define the budget building up on individual budget's.
+%Silvan's reply: I thought that we could start out by a fixed budget that is the same for all readers. At a later stage, however, we might want to change this parameter. That's why I left it unclear at this point.
+%Still: I now notice that my formal definition doesn't make any sense then. I will change it to "for all players". If we later want to change it, we can still assume a budget vector or something.
 The formal model we will base our anaylisis looks as follows:\\
-Given a set of voters/readers $N$ a set of candidates/news items $A$ and a corresponding profile $\mathbf{R}$ we want to fill a set of indispensable $M$. We do this by sequentially applying a resolute voting rule $F:\mathcal{L}(A)^n \rightarrow A$ for $|M|=m$ times. \textcolor{red}{For each step in the sequence we remove the previous step's winner. (Do we need to make this restriction already? there might be a voting rule that funny stuff when we do this)} This process is constrained by an attention budget $b\in \mathbb{R}_{\geq 0}$ for each player. Each item $a\in A$ is associated with a cost $c_a\in \mathbb{R_{\geq 0}}$ and if $M=\{a_1, \dots ,a_m\}$ then $\sum_1^m a_i \leq b$. The cardinality of $M$ thus depends on the items' cost and the composition of $M$.
+Given a set of voters/readers $N$ a set of candidates/news items $A$ and a corresponding profile $\mathbf{R}$ we want to fill a set of indispensable $M$. We do this by sequentially applying a resolute voting rule $F:\mathcal{L}(A)^n \rightarrow A$ for $|M|=m$ times. \textcolor{red}{For each step in the sequence we remove the previous step's winner. (Do we need to make this restriction already? there might be a voting rule that funny stuff when we do this)} This process is constrained by an attention budget $b\in \mathbb{R}_{\geq 0}$ for all players. Each item $a\in A$ is associated with a cost $c_a\in \mathbb{R_{\geq 0}}$ and if $M=\{a_1, \dots ,a_m\}$ then $\sum_1^m a_i \leq b$. The cardinality of $M$ thus depends on the items' cost and the composition of $M$.
 
 \section{Avenues of Analysis} 
-There are two paths we want to explore in terms of analysis:
+There are three paths we want to explore in terms of analysis:
 \begin{enumerate}
 \item As our hope ultimately is to come up with an SCF that provides us with a \textit{good} $M$, given some $\mathbf{R}$ in the context of media, we must qualify what \textit{good} means here. The obvious choice for this task are axiomatic tools from Social Choice Theory. We thus want to determine a set of desiderata a set of indispensable items $M$ should satisfy with respect to a profile $\mathbf{R}$. By way of illustration, one such axiom for $M$ could demand that any item that is present in the $90^th$ percentile for all readers, must be present in $M$.
 %Grzesiek's comment
-%Do we want to be a bit more specific about which axioms we think should be included? 
-We also hope to find some interaction between axiomatic choices at the level of SCF and $M$.
+%Do we want to be a bit more specific about which axioms we think should be included?
+%Silvan's reply: I added some detail and I think Max's part, which largely overlaps with this one right here, gives more detail as well.
+We also hope to find some interaction between axiomatic choices at the level of SCF - as Neutrality, the Pareto or Condorcet principle, for example - and axioms at the level of $M$. Especially the latter axioms yet need to be identified and described formally for such a study to take place.
 \item Instead of taking the axiomatic approach we could view the problem as minimizing some sort of discrepancy between $M$ and what the readers' preferences are, while respecting the budget constraint. Intuitively, such a discrepancy would be captured by a metric that, to give an example, indicates high discrepancy if the unanimous top-priority in the profile is not present in $M$ and lower discrepancy if the unanimous bottom-priority is absent. Our problem then becomes the challenge of finding a voting rule that yields the subset of $A$ - $M$ that minimizes discrepancy while staying within the budget.
 \item Furthermore, we can compare the results of k-sequential voting and non-resolute voting rules which give K winners. Similarly as above we can compare the set $M$ given by each procedure using some discrepancy measure in order to evaluate the procedures. Additionally, we can compare the complexity of these two different procedures.
 >>>>>>> 927403a2e774b2bd0b13e44d0ad4396afb9d5779
