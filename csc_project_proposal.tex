@@ -32,6 +32,7 @@
 \usepackage[normalem]{ulem}
 \date{}
 
+\newcommand{\haukur}[1]{\textcolor[rgb]{.8,.33,.0}{[TB: #1]}}% prints in orange
 \begin{document}
 \maketitle
 
@@ -63,6 +64,14 @@ We also hope to find some interaction between axiomatic choices at the level of 
 Formally speaking, the process of filling $M$ could be constrained by an attention budget $b\in \mathbb{R}_{\geq 0}$ for all players. Each item $a\in A$ is associated with a cost $c_a\in \mathbb{R_{\geq 0}}$ and if $M=\{a_1, \dots ,a_m\}$ then $\sum_1^m a_i \leq b$. The cardinality of $M$ thus depends on the items' cost and the composition of $M$.
 
 Instead of taking the axiomatic approach we can then view the problem as minimizing some sort of discrepancy between $M$ and what the readers' preferences are, while respecting the budget constraint. Intuitively, such a discrepancy would be captured by a metric that, to give an example, indicates high discrepancy if the unanimous top-priority in the profile is not present in $M$ and lower discrepancy if the unanimous bottom-priority is absent. Our problem then becomes the challenge of finding a voting rule that yields the subset of $A$ - $M$ that minimizes discrepancy while staying within the budget.
+
+\section{Issues to Address}
+\begin{enumerate}
+\item Are there dependencies between the elements of A? \haukur{I think it would be nice to be able to make that assumption, but it will make the model more complex and the benefits to our model of more expressibility are not that great (in my view). What do you guys think?}
+\item Piotr's thesis. \haukur{We should probably only stick to: Finding a Collective Set of Items: From Proportional Multirepresentation to Group Recommendation}
+\item Multiwinner voting rules. \haukur{We need to find papers about this}
+\Item First meeting. We need to identify a small set of relevant papers and eplain how they relate to our work. As well as clarify our model better. \haukur{Like above I think we need to find some papers on multiwinner voting rules as well as get a clearer understanding of Piotr's work.}
+\end{enumerate}
 
 \end{enumerate}
 
