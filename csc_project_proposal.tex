@@ -33,6 +33,8 @@
 \date{}
 
 \newcommand{\haukur}[1]{\textcolor[rgb]{.8,.33,.0}{[TB: #1]}}% prints in orange
+\newcommand{\Max}[2]{\textcolor[rgb]{.15,.73,.12}{[Max: #1]}}%green
+
 \begin{document}
 \maketitle
 
@@ -53,13 +55,13 @@ We should then proceed to further discuss and formally define the desiderata the
 Preliminarily, we will base our analysis on the following formal model:\\
 Given a set of voters/readers $N$ a set of candidates/news items $A$ and a corresponding profile $\mathbf{R}$ we want to fill a set of indispensable $M$. We do this by sequentially applying a resolute voting rule $F:\mathcal{L}(A)^n \rightarrow A$ for $|M|=m$ times. For each step in the sequence we remove the previous step's winner.
 
-\section{Avenues of Analysis} 
+\section{Avenues of Analysis}
 Once we have specified a basic formal model as a sort of baseline, there are two paths we want to explore to the end of further analysis:
 \begin{enumerate}
 \item As we ultimately want to come up with an SCF that provides us with a \textit{good} $M$, given some $\mathbf{R}$ in the context of media, we must qualify what \textit{good} means here. The obvious choice for this task are axiomatic tools from Social Choice Theory. We thus want to determine a set of desiderata a set of indispensable items $M$ should satisfy with respect to a profile $\mathbf{R}$. By way of illustration, one such axiom for $M$ could demand that any item that is present in the $90^th$ percentile for all readers, must be present in $M$.
 
 We also hope to find some interaction between axiomatic choices at the level of SCF - as Neutrality, the Pareto or Condorcet principle, for example - and axioms at the level of $M$. Especially the latter axioms yet need to be identified and described formally for such a study to take place.
-\item News consumers only have so much time and cognitive ressources at their disposal, yet receiving information through news requires both of these. At the same time, it is easy to see the desirability of people - as members in a community or citizens in a state- to be on the same page with respect to topics of high concern to other members. It is, therefore, important to get on understanding of how extract a common core of pieces of information from the dispersed interests and pet topics of individuals while, at the same, time respecting the constraints given by attention span and time. 
+\item News consumers only have so much time and cognitive ressources at their disposal, yet receiving information through news requires both of these. At the same time, it is easy to see the desirability of people - as members in a community or citizens in a state- to be on the same page with respect to topics of high concern to other members. It is, therefore, important to get on understanding of how extract a common core of pieces of information from the dispersed interests and pet topics of individuals while, at the same, time respecting the constraints given by attention span and time.
 
 Formally speaking, the process of filling $M$ could be constrained by an attention budget $b\in \mathbb{R}_{\geq 0}$ for all players. Each item $a\in A$ is associated with a cost $c_a\in \mathbb{R_{\geq 0}}$ and if $M=\{a_1, \dots ,a_m\}$ then $\sum_1^m a_i \leq b$. The cardinality of $M$ thus depends on the items' cost and the composition of $M$.
 
@@ -67,10 +69,10 @@ Instead of taking the axiomatic approach we can then view the problem as minimiz
 
 \section{Issues to Address}
 \begin{enumerate}
-\item Are there dependencies between the elements of A? \haukur{I think it would be nice to be able to make that assumption, but it will make the model more complex and the benefits to our model of more expressibility are not that great (in my view). What do you guys think?}
+\item Are there dependencies between the elements of A? \haukur{I think it would be nice to be able to make that assumption, but it will make the model more complex and the benefits to our model of more expressibility are not that great (in my view). What do you guys think?} \Max{I think this is something one would definitely want in an application ready algorithm, however with dependencies on topics (like Silvan suggested) not single articles. However, for the baseline I think we should not overcomplicate things. It would be a good thing to add later. }
 \item Piotr's thesis. \haukur{We should probably only stick to: Finding a Collective Set of Items: From Proportional Multirepresentation to Group Recommendation}
-\item Multiwinner voting rules. \haukur{We need to find papers about this}
-\Item First meeting. We need to identify a small set of relevant papers and eplain how they relate to our work. As well as clarify our model better. \haukur{Like above I think we need to find some papers on multiwinner voting rules as well as get a clearer understanding of Piotr's work.}
+\item Multiwinner voting rules. \haukur{We need to find papers about this}\Max{see my additions to the bibliography. The handbook section 9.3.2 is a good starting point for further sources}
+\item First meeting. We need to identify a small set of relevant papers and eplain how they relate to our work. As well as clarify our model better. \haukur{Like above I think we need to find some papers on multiwinner voting rules as well as get a clearer understanding of Piotr's work.}
 \end{enumerate}
 
 \end{enumerate}
