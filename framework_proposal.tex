@@ -1,0 +1,41 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+
+\title{
+  Framework Proposal\\ \large COMSOC Project
+\\
+  \large Silvan Hungerbuehler}
+
+\usepackage{mathptmx} % "times new roman"
+\usepackage{amssymb}
+\usepackage{amsmath, amsthm}
+\usepackage{amsfonts}
+\usepackage{enumitem}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{comment}
+%\usepackage[margin=1in]{geometry}
+\usepackage{float}
+\def\one{\mbox{1\hspace{-4.25pt}\fontsize{12}{14.4}\selectfont\textrm{1}}} % 11pt    
+\usepackage{bm}
+
+\usepackage[normalem]{ulem}
+\date{}
+\begin{document}
+\maketitle
+\paragraph{Basic Idea}
+We construe the problem of giving a media recommendation to a group of people as the problem of finding that recommendation that maximizes readers' value while satisfying some budget side-constraint. Maximizing value (which could probably be recast as minimizing misrepresentation) will require coming up with some metric based on the profile and the recommendation; my preliminary suggestion for this is to use the Borda score.
+\paragraph{Framework}
+We have a set of \emph{news items} $A=\{a_1,...,a_m\}$, each having a specific \emph{cost} $C: A\rightarrow \mathbb{R}$, a set of \emph{recommended items} $W\subseteq A$, a set of \emph{consumers} $N=\{n_1,...,n_n\}$, a \emph{profile of preferences} over the set of items $\mathbf{R}\in \mathcal{L}^n$ and a \emph{budget} $B\in \mathbb{R}_{\geq 0}$.\\
+Further, there is a \emph{value function}, akin to a Borda vector, indicating how much a consumer values an option in her ballot amongst the recommended items. It takes as an input the consumer, the profile and an element of $A$,  $V: \mathcal{L}^n \times N \times  A \rightarrow \mathbb{R}$. It is akin to a Borda in the concrete case where $V$ outputs the value $m-1$ for all consumers' candidates in the top position, $m-2$ for the candidates in the second position and so forth. This is very general and is perhaps more conventiently expressed with vector notation, but I could not figure out how to express the maximization problem that way, so I hope the idea is clear.\\
+
+What we try to maximize is the sum of all the consumers' values by choosing $W$ (of course this can be recast as a minimization problem by adjusting $V$). For each consumer we only count the value from the news items that are actually in the recommended set:\\
+\begin{equation}
+\max_W \sum_{j=1}^n \sum_{i=1}^m \one [a_i\in W] V(\mathbf{R}, n_j, a_i)
+\end{equation}
+
+Of course, Equation 1 is trivially solved by $W=A$. But the interest in solving it comes from adding the budget constraint.
+\begin{equation}
+\max_W \sum_{j=1}^n \sum_{i=1}^m \one [a_i\in W] V(\mathbf{R}, n_j, a_i) \text{ subject to } \sum_{a_i \in W} C(a_i) \leq B
+\end{equation}
+\end{document}
