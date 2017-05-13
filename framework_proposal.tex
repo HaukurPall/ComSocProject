@@ -2,7 +2,7 @@
 \usepackage[utf8]{inputenc}
 
 \title{
-  Framework Proposal\\ \large COMSOC Project
+  Two Framework Proposals\\ \large COMSOC Project
 \\
   \large Silvan Hungerbuehler}
 
@@ -23,6 +23,7 @@
 \date{}
 \begin{document}
 \maketitle
+\section{Proposal 1: Multiwinner PSR maximized under Budget constraint}
 \paragraph{Basic Idea}
 We construe the problem of giving a media recommendation to a group of people as the problem of finding that recommendation that maximizes readers' value while satisfying some budget side-constraint. Maximizing value (which could probably be recast as minimizing misrepresentation) will require coming up with some metric based on the profile and the recommendation; my preliminary suggestion for this is to use the Borda score.
 
@@ -104,6 +105,49 @@ For each consumer and item pair it is only ranked at most once.
 \sum_{j=1}^{m} u_i(a_j)\cdot w_{i,j,k} \geq \sum_{j=1}^{m} u_i(a_j)\cdot w_{i,j,k+1}
 \end{equation}
 We only consider cases in which $w_{i,j,k}$ is in acsending order according to the consumer's utilities. If we use this formalization we capture the
+
+\section{Proposal 2: Condorcet Committee}
+
+\paragraph{Investigations}
+
+Max: I investigated Condorcet winning sets and it turns out they are probably not useful for us. Turns out a Condorcet winning set is defined
+\emph{disjunctively}, i.e. a set W is Condorcet-winning if for every alternative $a\in X\setminus W$, there is majority of voters such that every
+voter in the majority prefers \emph {some} element of W over a. This requirement is very weak s.t. most elections have already multiple Condorcet
+Winning sets of size 2 and it is not even known whether any election exist with a smallest Condorcet winning set of size greater than 3.
+
+Thus the criterion is usually strenghtened by not just requiring majority but a higher threshold $\theta$. With a high enough threshold the rule
+"smallest $\theta$-winning set" becomes more decisive.
+
+I have a hard time of getting a good intuition what kind of properties such a rule has and whether they are desirable in our context. Maybe some
+of you have a better intuition?
+
+Possibly of greater interest is the concept of Condorcet Committee. Condorcet Committees are defined \emph{conjunctively}, i.e. W is a Condorcet
+committee if every $w\in W$ beats every $a\in X\setminus W$ in pairwise majority contests. The smallest Condorcet Committee given a profile is
+called a Smith set. This already implies the problem that like a Condorcet Winner, a Condorcet Committee of a given size k needn't always exist.
+Thus the voting rule is usually extended to some k-Condorcet-Committee consistent rule.
+
+\paragraph{Basic Idea}
+
+One could use Condorcet Committees but go a different avenue. Analogously to before, we relax the majority requirement calling the committees
+obtained $\theta$-commitee (e.g. every w in the $0.3$-commitee W gets at least 30\% in pairwise majority contests against every $a\in X\setminus
+W$). Likewise, we generalise the notion of a Smith set to $\theta$-Smith sets. Instead of requiring a fixed k, we again set a budget constraint.
+We then choose the \emph{smallest} $\theta$ for which the $\theta$-Smith set is still compatible with the budget.
+
+\paragraph{Framework}
+
+As before, we have a set of \emph{news items} $A=\{a_1,...,a_m\}$, each having a specific \emph{cost} $C: A\rightarrow \mathbb{R}$, a set of
+\emph{recommended items} $W\subseteq A$, a set of \emph{consumers} $N=\{n_1,...,n_n\}$, a \emph{profile of preferences} over the set of items
+$\mathbf{R}\in \mathcal{L}^n$ and a \emph{budget} $B\in \mathbb{R}_{\geq 0}$.
+
+W is a \emph{$\theta$-committee} if for every $w\in W$, $a\in X\setminus W$ $|\{n_i:w\succ_i z\}|>\theta N$. For a given $\theta$, let
+$cond_{\theta,\mathbf{R}}\subseteq 2^A$ be the set of all $\theta$-committees of a given profile $\mathbf{R}$. Let $bud_\mathbf{R}\subseteq 2^A$
+be the set of all budget-consistent subsets of A. Given a set of sets B denote by min(B) the function that outputs the element of B with the
+smallest cardinality (together with some tie breaking rule). Then our voting rule is characterized by $W=min(cond_{\theta,\mathbf{R}})$ and the
+following optimization problem:
+
+\[\min \theta \text{ subject to } \sum_{a_i\in W}c(a_i)\leq B\]
+
+
 \end{document}
 
 
