@@ -48,6 +48,10 @@ input and b) would not really be about voting rules anymore. Therefore I would p
 alternative would be to use an impartial culture assumption of sorts, e.g. randomly generate scoring vectors with monotonely descending
 values.
 
+Regarding the voting rule. If we use a fixed k then this is indeed k-Borda if I'm not mistaken. However, in both Silvan's and Haukur's
+framework the constraint is not some fixed k but a fixed budget B. So the voting procedure is rather "maximisize the winning set's (Borda)
+score under a budget constraint".
+
 What we try to maximize is the sum of all the consumers' values by choosing $W$ (of course this can be recast as a minimization problem by adjusting $V$). For each consumer we only count the value from the news items that are actually in the recommended set:\\
 \begin{equation}
 \max_W \sum_{j=1}^n \sum_{i=1}^m \one [a_i\in W] V(\mathbf{R}, n_j, a_i)
@@ -101,3 +105,5 @@ For each consumer and item pair it is only ranked at most once.
 \end{equation}
 We only consider cases in which $w_{i,j,k}$ is in acsending order according to the consumer's utilities. If we use this formalization we capture the
 \end{document}
+
+
