@@ -2,7 +2,7 @@
 \usepackage[utf8]{inputenc}
 
 \title{
-  Two Framework Proposals\\ \large COMSOC Project
+  Two Framework Proposals and how they compare\\ \large COMSOC Project
 \\
   \large Silvan Hungerbuehler}
 
@@ -23,7 +23,7 @@
 \date{}
 \begin{document}
 \maketitle
-\section{Proposal 1: Multiwinner PSR maximized under Budget constraint}
+\section{Proposal 1: Budgeted k-Borda}
 \paragraph{Basic Idea}
 We construe the problem of giving a media recommendation to a group of people as the problem of finding that recommendation that maximizes readers' value while satisfying some budget side-constraint. Maximizing value (which could probably be recast as minimizing misrepresentation) will require coming up with some metric based on the profile and the recommendation; my preliminary suggestion for this is to use the Borda score.
 
@@ -106,7 +106,7 @@ For each consumer and item pair it is only ranked at most once.
 \end{equation}
 We only consider cases in which $w_{i,j,k}$ is in acsending order according to the consumer's utilities. If we use this formalization we capture the
 
-\section{Proposal 2: Condorcet Committee}
+\section{Proposal 2: $\theta$-Smith rule}
 
 \paragraph{Investigations}
 
@@ -140,12 +140,32 @@ As before, we have a set of \emph{news items} $A=\{a_1,...,a_m\}$, each having a
 $\mathbf{R}\in \mathcal{L}^n$ and a \emph{budget} $B\in \mathbb{R}_{\geq 0}$.
 
 W is a \emph{$\theta$-committee} if for every $w\in W$, $a\in X\setminus W$ $|\{n_i:w\succ_i z\}|>\theta N$. For a given $\theta$, let
-$cond_{\theta,\mathbf{R}}\subseteq 2^A$ be the set of all $\theta$-committees of a given profile $\mathbf{R}$. Let $bud_\mathbf{R}\subseteq 2^A$
-be the set of all budget-consistent subsets of A. Given a set of sets B denote by min(B) the function that outputs the element of B with the
-smallest cardinality (together with some tie breaking rule). Then our voting rule is characterized by $W=min(cond_{\theta,\mathbf{R}})$ and the
-following optimization problem:
+$cond_{\theta,\mathbf{R}}\subseteq 2^A$ be the set of all $\theta$-committees of a given profile $\mathbf{R}$. Given a set of sets B denote by min(B) the function that outputs the element of B with the smallest cardinality (together with some tie breaking rule). Then our voting rule is characterized by $W=min(cond_{\theta,\mathbf{R}})$ and the following optimization problem:
 
 \[\min \theta \text{ subject to } \sum_{a_i\in W}c(a_i)\leq B\]
+
+\section{Comparison}
+
+Discussion with Haukur and Greg yielded the idea of a comparison of a $\theta$-Smith-set-consistent approach to a PSR-based approach with respect
+to certain desirable properties of the winner sets (or "axioms"). Here are three (which are insufficiently formalized and of course debatable):
+
+\begin{itemize}
+\item \textbf{Minimal Regret/Maximal utility}: the voting rule minimisizes regret/maximizes utility.
+\item \textbf{Equality}: readers' utility is within a certain intervall.
+\item \textbf{$\theta N$-minority consistency}: If a minority of $\theta N$-readers ranks an item first, then the item will be in W.
+
+
+
+\end{itemize}
+
+In additions the axioms from Elkind et. al. 2014 would be of interest.
+
+Questions: Are these properties indeed desirable? How bad is the loss in utility for the $\theta$-Smith rule compared to the budgeted k-Borda
+rule? How much worse is budgeted k-Borda compared to the $\theta$-Smith rule wrt $\theta N$-minority consistency? How do the two rules fare in
+terms of equality?
+
+Possible starting point: Diss and Doghmi 2016 have studied how likely it is for k-Borda to pick the k-Condorcet Committee. I have put the paper
+in the Bibtex file.
 
 
 \end{document}
