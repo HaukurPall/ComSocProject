@@ -25,6 +25,10 @@
 \maketitle
 \paragraph{Basic Idea}
 We construe the problem of giving a media recommendation to a group of people as the problem of finding that recommendation that maximizes readers' value while satisfying some budget side-constraint. Maximizing value (which could probably be recast as minimizing misrepresentation) will require coming up with some metric based on the profile and the recommendation; my preliminary suggestion for this is to use the Borda score.
+
+Max: Another way to frame the problem: We are given a profile of preference orders. The interpretation is that the preferences
+are "revealed" by an individual recommendation algorithm using readers' past behaviour, likes and other data. Based on this profile we want to give a group recommendation assuming that each reader will read the whole recommendation. The latter assumption receives the strongest justification if a) it adheres to a budget (of e.g. time, effort) set by the readers and b) minimizes regret/complaint the readers have when comparing the selection to their individual recommendation.
+
 \paragraph{Framework}
 We have a set of \emph{news items} $A=\{a_1,...,a_m\}$, each having a specific \emph{cost} $C: A\rightarrow \mathbb{R}$, a set of \emph{recommended items} $W\subseteq A$, a set of \emph{consumers} $N=\{n_1,...,n_n\}$, a \emph{profile of preferences} over the set of items $\mathbf{R}\in \mathcal{L}^n$ and a \emph{budget} $B\in \mathbb{R}_{\geq 0}$.\\
 Further, there is a \emph{value function}, akin to a Borda vector, indicating how much a consumer values an option in her ballot amongst the recommended items. It takes as an input the consumer, the profile and an element of $A$,  $V: \mathcal{L}^n \times N \times  A \rightarrow \mathbb{R}$. It is akin to a Borda in the concrete case where $V$ outputs the value $m-1$ for all consumers' candidates in the top position, $m-2$ for the candidates in the second position and so forth. This is very general and is perhaps more conventiently expressed with vector notation, but I could not figure out how to express the maximization problem that way, so I hope the idea is clear.\\
@@ -32,6 +36,17 @@ Further, there is a \emph{value function}, akin to a Borda vector, indicating ho
 Haukur: I find the value definition a bit too general. It allows for a voter to base her utilities on other people's perferences and I see this as opening of a plethora of possibilities and expressibility which we do not need. We could rather assume that consumers' utilities are independent of each other and only based on the item, not considering what other itemes are in $W$ \emph{intrinsic utility}. Essentially, each consumer $i$ assigns a value to item $a_j$. For the specific Borda case, $u_i(a_j)=m-1$ if $a_j$ is the item $i$ likes the most. Furthermore, we take the \emph{utilitarian} view and measure the social welfare as the sum of each agent's percieved utility. We might want to consider \emph{rank based utilities} in which consumers evaluate $W$ with respect to the order each item in $W$ appears in their preference order, see formulation later.
 
 Discussion with Max \& Greg: We should not consider \emph{rank based utilities} because we should assume that all readers read everything. Therefore we should use K-borda for this problem.
+
+Max: If I understand correctly, in both Silvan's and Haukur's picture it is possible for voters to have different scoring vectors, e.g. a
+might have a Borda vector over their profile and b a k-approval vector. While this gives a lot of expressibility, the problem I have with
+it is that it essentially requires utilities as \emph{input}. A preference order plus a scoring vector is nothing else than a utility.
+I'm fine with constructing pseudo-utilities for technical reasons in a generic way by e.g. always using the same Borda-vector. However,
+using individual scoring vectors would require information about the individual voters' utilities which would go beyond the realm of voting
+rules. If we were to go this way, I think there is no reason why we don't directly consider a profiule of utilities instead of a profile of
+preferences plus individual scoring vectors - no need for the value function. However, a) this requires much more information in the
+input and b) would not really be about voting rules anymore. Therefore I would prefer to stick with a generic scoring vector. An
+alternative would be to use an impartial culture assumption of sorts, e.g. randomly generate scoring vectors with monotonely descending
+values.
 
 What we try to maximize is the sum of all the consumers' values by choosing $W$ (of course this can be recast as a minimization problem by adjusting $V$). For each consumer we only count the value from the news items that are actually in the recommended set:\\
 \begin{equation}
