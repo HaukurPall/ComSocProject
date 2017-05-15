@@ -14,6 +14,7 @@
 \usepackage{verbatim}
 \usepackage{hyperref}
 \usepackage{comment}
+\usepackage{color}
 %\usepackage[margin=1in]{geometry}
 \usepackage{float}
 \def\one{\mbox{1\hspace{-4.25pt}\fontsize{12}{14.4}\selectfont\textrm{1}}} % 11pt    
@@ -128,19 +129,41 @@ Thus the voting rule is usually extended to some k-Condorcet-Committee consisten
 
 \paragraph{Basic Idea}
 
-One could use Condorcet Committees but go a different avenue. Analogously to before, we relax the majority requirement calling the committees
-obtained $\theta$-commitee (e.g. every w in the $0.3$-commitee W gets at least 30\% in pairwise majority contests against every $a\in X\setminus
-W$). Likewise, we generalise the notion of a Smith set to $\theta$-Smith sets. Instead of requiring a fixed k, we again set a budget constraint.
-We then choose the \emph{smallest} $\theta$ for which the $\theta$-Smith set is still compatible with the budget.
+\textcolor{red}{This idea currently does not work!} One could use Condorcet Committees but go a different avenue.
+Analogously to before,we relax the majority requirement calling the committees obtained $\theta$-commitee (e.g. every w
+in the $0.3$-commitee W gets at least 30\% in pairwise majority contests against every $a\in X\setminus W$). Likewise, we
+generalise the notion of a Smith set to $\theta$-Smith sets. Instead of requiring a fixed k, we again set a budget
+constraint. We then choose the \emph{smallest} $\theta$ for which the $\theta$-Smith set is still compatible with the
+budget.
 
 \paragraph{Framework}
 
-As before, we have a set of \emph{news items} $A=\{a_1,...,a_m\}$, each having a specific \emph{cost} $C: A\rightarrow \mathbb{R}$, a set of
-\emph{recommended items} $W\subseteq A$, a set of \emph{consumers} $N=\{n_1,...,n_n\}$, a \emph{profile of preferences} over the set of items
-$\mathbf{R}\in \mathcal{L}^n$ and a \emph{budget} $B\in \mathbb{R}_{\geq 0}$.
+As before, we have a set of \emph{news items} $A=\{a_1,...,a_m\}$, each having a specific \emph{cost} $C:
+A\rightarrow \mathbb{R}$, a set of \emph{recommended items} $W\subseteq A$, a set of \emph{consumers} $N=\{n_1,...,
+n_n\}$, a \emph{profile of preferences} over the set of items $\mathbf{R}\in \mathcal{L}^n$ and a \emph{budget}
+$B\in \mathbb{R}_{\geq 0}$.
 
-W is a \emph{$\theta$-committee} if for every $w\in W$, $a\in X\setminus W$ $|\{n_i:w\succ_i z\}|>\theta N$. For a given $\theta$, let
-$cond_{\theta,\mathbf{R}}\subseteq 2^A$ be the set of all $\theta$-committees of a given profile $\mathbf{R}$. Given a set of sets B denote by min(B) the function that outputs the element of B with the smallest cardinality (together with some tie breaking rule). Then our voting rule is characterized by $W=min(cond_{\theta,\mathbf{R}})$ and the following optimization problem:
+W is a \emph{$\theta$-committee} if for every $w\in W$, $a\in X\setminus W$ $|\{n_i:w\succ_i z\}|>\theta N$. For a
+given $\theta$, let cond_{\theta,\mathbf{R}}\subseteq 2^A$ be the set of all $\theta$-committees of a given
+profile $\mathbf{R}$. Given a set of sets B denote by min(B) the function that outputs the element of B with the
+smallest cardinality (together with some tie breaking rule). Then our voting rule is characterized by $W=min
+(cond_{\theta,\mathbf{R}})$ and the following optimization problem:
+
+\[\min \theta \text{ subject to } \sum_{a_i\in W}c(a_i)\leq B\]
+
+\section: {Proposal III: Least-$\theta$-rule}
+
+\paragraph{Basic Idea}
+
+Instead of a Condorcet Committee, we want to elect the \emph {set of $\theta$-winners} $\Theta$, that is the set
+of all alternatives that win at least $\theta \% $ in all majority contests. Given the budget constraint, we
+choose the smallest $\theta$ that is still compatible with the budget.
+
+\paragraph{Framework}
+
+We define $\Theta$ as follows: let $a:b$ denote the majority contest between a and b and $\#_i(a:b)\in [0,1]$ the
+share of the vote that a wins against b in that contest. Then $\Theta=\{a\in A: \text { for all } b\in A\{a}
+#_i(a:b)\geq \theta\}. Then W=$\Theta$ subject to the following optimization problem:
 
 \[\min \theta \text{ subject to } \sum_{a_i\in W}c(a_i)\leq B\]
 
