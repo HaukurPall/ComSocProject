@@ -48,53 +48,80 @@
 \maketitle
 
 \begin{abstract}
-Some abstract
+This is a placeholder for the glorious abstract yet to come.
 \end{abstract}
 
-\section{Section}\label{intro}
+\section{Introduction}\label{introduction}
+Some questions we would like to ask Ulle:
+\begin{itemize}
+\item What's his opinion of Schultze? What is his opinion, in general, about the rules we picked, especially wrt fact that we abandoned multiwinner rules which are solely constrained by cardinality?
+\item Proofs vs. Simulations
+\item  What's his opinion on the desirable properties we have come up with?
+\end{itemize}
+%This is how you {\it do italics}.
 
-This is how you {\it do italics}.
+%And this is how you {\em emphasize}
+%Reference to Section~\ref{intro}
 
-And this is how you {\em emphasize}
+%{\tt code text}
 
-\subsection{Subsection}
+%\begin{quote}
+%And a quote
+%\end{quote}
 
-Reference to Section~\ref{intro}
+%Footnote\footnote{blurg}
 
-{\tt code text}
+%A bold {\bf letter}
 
-\begin{quote}
-And a quote
-\end{quote}
+\section{Desirables \& Dimensions of Performance}\label{desirables}
+The following are a bunch of things we would like a recommendation mechanism to do.
+We will describe these desiderata formally and describe their relation and relevance to our goal stated in the introduction.
+\subsection{Desirables}
+\subsubsection{Regret Mbinimization}
+\subsubsection{Minority Consistency}
+\subsubsection{Cost Distribution}
+There are two polar extremes here:
+One one end one could conceive a rule that picks chunky, expensive items (long, in-depth articles);
+ on the other end rules that pick snacky, cheap items (Vice).
+ In principle, any distribution over article prices is conceivable.
+ \subsubsection{A bunch of more rules we yet have to get from the article.} 
 
-Footnote\footnote{blurg}
 
-A bold {\bf letter}
+\section{Recommendation Rules}
 
-\subsubsection{References}
+%Referencing ~\shortcite{Elkind2015} in text. Speaking about work ~\cite{Elkind2015}.
+Here come a bunch of voting rules that we think will perform well with respect to above desiderata.
+%\subsection{Haukur's work}
 
-Referencing ~\shortcite{Elkind2015} in text. Speaking about work ~\cite{Elkind2015}.
+%One idea on scoring vectors to, perhaps, capture more realistic preferences.
 
-\subsection{Haukur's work}
+%Three voting rules.
 
-One idea on scoring vectors to, perhaps, capture more realistic preferences.
+%\subsection{Capturing interest groups}
 
-Three voting rules.
+%Instead of considering the borda scoring vector when maximizing utility we might want to use a vector which gives the
+%first candidate marginally more points than the second candidate and so on until we reach the middle candidate then the margin
+% starts to grow again until it reaches what it was in the beginning. This allows voters to select a few items which they
+% "really like" and a few items which they "really hate". Think of $-x^3$.
 
-\subsubsection{Capturing interest groups}
+\subsection{K-plurality rule}
 
-Instead of considering the borda scoring vector when maximizing utility we might want to use a vector which gives the
-first candidate marginally more points than the second candidate and so on until we reach the middle candidate then the margin
- starts to grow again until it reaches what it was in the beginning. This allows voters to select a few items which they
- "really like" and a few items which they "really hate". Think of $-x^3$.
+The {\em k-plurality rule} with $k<|A|$ is a {\em positional scoring rule} with the same scoring vector as the normal
+{\em plurality rule}, $(1,0, \dots, 0)$, but instead of electing the alternative(s) with the highest score it elects the
+alternative(s) with the highest score, if the number of winners is strictly less than $k$ then the alternative(s) with
+the second highest score is elected. This is done until $|W| \geq k$. If $|W| > k$ then a tie-breaker should be applied
+on the last iteration.
 
-\subsubsection{Schulze rule}
+
+Computationally feasible.\subsection{Schulze rule}
 
 Has many nice properties and is closely related to the $20\%$ minimal requirement.
 
 Computationally feasible.
 
-\subsubsection{$\Theta$-Smith set}
+\subsection{$\theta$-rule}
+
+\subsection{Extended $\Theta$-Smith}
 
 The $\Theta$-Smith set is the smallest non-empty set of candidates s.t. each member of the set defeats every other member outside
  the set in $\Theta \%$ of cases.
@@ -110,30 +137,40 @@ satsfied we need to iterate over the interval in which the cost restriction brea
 
 Computationally feasible.
 
-\subsubsection{K-plurality rule}
-
-The {\em k-plurality rule} with $k<|A|$ is a {\em positional scoring rule} with the same scoring vector as the normal
-{\em plurality rule}, $(1,0, \dots, 0)$, but instead of electing the alternative(s) with the highest score it elects the
-alternative(s) with the highest score, if the number of winners is strictly less than $k$ then the alternative(s) with
-the second highest score is elected. This is done until $|W| \geq k$. If $|W| > k$ then a tie-breaker should be applied
-on the last iteration.
-
-Computationally feasible.
-
-\subsubsection{Utility Optimization}
-We could also cast the problem of coming up with the best recommendation, given the items' costs as well as the budget, as a maximization problem. What we try to maximize is the sum of all the consumers' values by choosing $W$, where a consumer's value of seeing some item in $W$ is represented by a vector $\boldsymbol{s}$. For each consumer we only count the value from the news items that are actually in the recommended set:\\
+\subsection{Utility Optimization}
+We could also cast the problem of coming up with the best recommendation, 
+given the items' costs as well as the budget, as a maximization problem. 
+What we try to maximize is the sum of all the consumers' values by choosing $W$, 
+where a consumer's value of seeing some item in $W$ is represented by a vector $\mathbf{s}$. 
+For each consumer we only count the value from the news items that are actually in the recommended set:\\
 \begin{equation}
 \max_W \sum_{j=1}^n \sum_{i=1}^m \one [a_i\in W] V(\mathbf{R}, n_j, a_i)
 \end{equation}
 
-Of course, Equation 1 is trivially solved by $W=A$. But the interest in solving it comes from adding the budget constraint.
+Of course, Equation 1 is trivially solved by $W=A$. 
+But the interest in solving it comes from adding the budget constraint.
 \begin{equation}
 \max_W \sum_{j=1}^n \sum_{i=1}^m \one [a_i\in W] V(\mathbf{R}, n_j, a_i) \text{ subject to } \sum_{a_i \in W} C(a_i) \leq B
 \end{equation}
 
-This problem, however, is the well-studied {\em 0-1 Knapsack} problem. Given a set of items, each with a weight and a value, what is the most valuable knapsack that you can put together without exceeding its maximal load. In our case the weight corresponds to an article's cost, the value to the sum of all consumers' value if the item is included in $W$, and the maximal load corresponds to our budget $B$. 
+This problem, however, is the well-studied {\em 0-1 Knapsack} problem. 
+Given a set of items, each with a weight and a value, 
+what is the most valuable knapsack that you can put together without exceeding its maximal load. 
+In our case the weight corresponds to an article's cost, 
+the value to the sum of all consumers' value if the item is included in $W$, 
+and the maximal load corresponds to our budget $B$. 
 
-Although the optimization problem is NP-hard, there exists pseudo-polynomial algorithms using dynamic programming as well as polynomial-time approximation schemes. 
+Although the optimization problem is NP-hard, there exists pseudo-polynomial algorithms using dynamic programming 
+as well as polynomial-time approximation schemes. 
+
+\section{Simulations}
+\subsection{Method}
+\subsection{Results}
+\subsection{Discussion}
+\subsection{Proofs}
+
+\section{Conclusion}
+
 %% The file named.bst is a bibliography style file for BibTeX 0.99c
 \bibliographystyle{named}
 \bibliography{references}
