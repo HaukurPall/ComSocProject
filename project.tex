@@ -120,6 +120,20 @@ on the last iteration.
 
 Computationally feasible.
 
+\subsubsection{Utility Optimization}
+We could also cast the problem of coming up with the best recommendation, given the items' costs as well as the budget, as a maximization problem. What we try to maximize is the sum of all the consumers' values by choosing $W$, where a consumer's value of seeing some item in $W$ is represented by a vector $\boldsymbol{s}$. For each consumer we only count the value from the news items that are actually in the recommended set:\\
+\begin{equation}
+\max_W \sum_{j=1}^n \sum_{i=1}^m \one [a_i\in W] V(\mathbf{R}, n_j, a_i)
+\end{equation}
+
+Of course, Equation 1 is trivially solved by $W=A$. But the interest in solving it comes from adding the budget constraint.
+\begin{equation}
+\max_W \sum_{j=1}^n \sum_{i=1}^m \one [a_i\in W] V(\mathbf{R}, n_j, a_i) \text{ subject to } \sum_{a_i \in W} C(a_i) \leq B
+\end{equation}
+
+This problem, however, is the well-studied {\em 0-1 Knapsack} problem. Given a set of items, each with a weight and a value, what is the most valuable knapsack that you can put together without exceeding its maximal load. In our case the weight corresponds to an article's cost, the value to the sum of all consumers' value if the item is included in $W$, and the maximal load corresponds to our budget $B$. 
+
+Although the optimization problem is NP-hard, there exists pseudo-polynomial algorithms using dynamic programming as well as polynomial-time approximation schemes. 
 %% The file named.bst is a bibliography style file for BibTeX 0.99c
 \bibliographystyle{named}
 \bibliography{references}
