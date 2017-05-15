@@ -1,0 +1,128 @@
+% These are the instructions for authors for IJCAI-17.
+% They are the same as the ones for IJCAI-11 with superficical wording
+%   changes only.
+
+\documentclass{article}
+% The file ijcai17.sty is the style file for IJCAI-17 (same as ijcai07.sty).
+\usepackage{ijcai17}
+
+% Use the postscript times font!
+\usepackage{times}
+
+% the following package is optional:
+%\usepackage{latexsym}
+
+% Following comment is from ijcai97-submit.tex:
+% The preparation of these files was supported by Schlumberger Palo Alto
+% Research, AT\&T Bell Laboratories, and Morgan Kaufmann Publishers.
+% Shirley Jowell, of Morgan Kaufmann Publishers, and Peter F.
+% Patel-Schneider, of AT\&T Bell Laboratories collaborated on their
+% preparation.
+
+% These instructions can be modified and used in other conferences as long
+% as credit to the authors and supporting agencies is retained, this notice
+% is not changed, and further modification or reuse is not restricted.
+% Neither Shirley Jowell nor Peter F. Patel-Schneider can be listed as
+% contacts for providing assistance without their prior permission.
+
+% To use for other conferences, change references to files and the
+% conference appropriate and use other authors, contacts, publishers, and
+% organizations.
+% Also change the deadline and address for returning papers and the length and
+% page charge instructions.
+% Put where the files are available in the appropriate places.
+
+\title{Collective Recommendations}
+\author{
+    Haukur J{\'o}nsson \\    \texttt{haukurpalljonsson@gmail.com}
+    \and
+    Silvan Hungerb{\"u}hler \\   \texttt{silvan.hungerbuehler@bluewin.ch}
+    \and
+    Grzegorz Lisowski \\  \texttt{grzegorz.adam.lisowski@gmail.com}
+    \and
+    Max Rapp \\  \texttt{maxgrapp@gmail.com}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Some abstract
+\end{abstract}
+
+\section{Section}\label{intro}
+
+This is how you {\it do italics}.
+
+And this is how you {\em emphasize}
+
+\subsection{Subsection}
+
+Reference to Section~\ref{intro}
+
+{\tt code text}
+
+\begin{quote}
+And a quote
+\end{quote}
+
+Footnote\footnote{blurg}
+
+A bold {\bf letter}
+
+\subsubsection{References}
+
+Referencing ~\shortcite{Elkind2015} in text. Speaking about work ~\cite{Elkind2015}.
+
+\subsection{Haukur's work}
+
+One idea on scoring vectors to, perhaps, capture more realistic preferences.
+
+Three voting rules.
+
+\subsubsection{Capturing interest groups}
+
+Instead of considering the borda scoring vector when maximizing utility we might want to use a vector which gives the
+first candidate marginally more points than the second candidate and so on until we reach the middle candidate then the margin
+ starts to grow again until it reaches what it was in the beginning. This allows voters to select a few items which they
+ "really like" and a few items which they "really hate". Think of $-x^3$.
+
+\subsubsection{Schulze rule}
+
+Has many nice properties and is closely related to the $20\%$ minimal requirement.
+
+Computationally feasible.
+
+\subsubsection{$\Theta$-Smith set}
+
+The $\Theta$-Smith set is the smallest non-empty set of candidates s.t. each member of the set defeats every other member outside
+ the set in $\Theta \%$ of cases.
+
+ The $\Theta$-Smith set is a Condorcet extension.
+
+A suggestion of an algorithm which selects a "good" $\Theta$-Smith set. Compute the Smith set for $\Theta=50$
+(the normal Smith set), check if it satisfies the cost restricitons. Second, check the upper-bound by finding the Smith
+set of $\Theta=100$, if it satisfies the cost restriction, select it. Depending on the case the cost restriction was not
+satsfied we need to iterate over the interval in which the cost restriction break, start iterating from $\Theta=50$ and
+ increase/decrease $\Theta$ by $(100-50)/2=25$ or $(50-0)/2=25$ until a set is found which satisfies the cost
+ restrictions (when found, there might be multiple.).
+
+Computationally feasible.
+
+\subsubsection{K-plurality rule}
+
+The {\em k-plurality rule} with $k<|A|$ is a {\em positional scoring rule} with the same scoring vector as the normal
+{\em plurality rule}, $(1,0, \dots, 0)$, but instead of electing the alternative(s) with the highest score it elects the
+alternative(s) with the highest score, if the number of winners is strictly less than $k$ then the alternative(s) with
+the second highest score is elected. This is done until $|W| \geq k$. If $|W| > k$ then a tie-breaker should be applied
+on the last iteration.
+
+Computationally feasible.
+
+%% The file named.bst is a bibliography style file for BibTeX 0.99c
+\bibliographystyle{named}
+\bibliography{references}
+
+\end{document}
+
