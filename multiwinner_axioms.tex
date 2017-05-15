@@ -1,68 +1,65 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage{amssymb}
 \title{Multiwinner axioms}
 \author{Grzegorz Lisowski}
 \begin{document}
 \maketitle
-In this piece I simply extract axioms mentioned by Elkind with their formalization. Henceforth let $C$ be a set of alternatives, $k$ be a number of slots in the committee, $V$ be a profile of voters and $F$ be a voting rule. 
+In this piece I simply extract axioms mentioned by Elkind with their formalization. Henceforth let $C$ be a set of alternatives, $k$ be a number of slots in the committee, $V$ be a profile of voters and $F$ be a voting rule. $V_1 + V_2$ abbreviates the concatenation of $V_1$ and $V_2$, while $t*V$ means the concatenation of $t$ copies of $V$. For all axioms a brief motivation, followed by a formal statement will be provided.
 \section{Nonimposition}
 \begin{enumerate}
 \item Every $k$-set of items might win the elections.
-\item For any set of alternatives $C$ and any $k$-subset of $C$ $W$ there is a profile $V$ such that $F(V)=C$
+\item For any set of alternatives $C$ and any $k$-subset of $C$ $W$ there is a profile $V$ such that $F(V, k)=C$
 \end{enumerate}
 
 \section{Consistency}
 \begin{enumerate}
 \item 
-\item 
+\item For any pair of profile of voters $V_1$, $V_2$: if $V_1 \cap V_2 \neq \emptyset$, then $F(V_1+V_2, k)=F(V_1) \cap F(V_2, k)$
 \end{enumerate}
 
 \section{Homogeneity}
 \begin{enumerate}
-\item 
-\item 
+\item Profiles of voters of the same structure should provide the same outcome.
+\item For any profile of voters $V$ and any $n \in \mathbb{N}$: $F(t*V, k)=F(V, k)$
 \end{enumerate}
 
 \section{Monotonicity}
 \begin{enumerate}
-\item 
-\item 
+\item If an option belongs to a winning set, she should also be in a winning set if she receives additional support.
+\item For any profile of voters $V$ and any $c \in C$ such that $c \in W$, where $W \in F(V, k)$, for any profile $V'$ obtained from $V$ by putting $c$ one position higher in one of the votes: (1) $c \in W'$, where $W' \in F(V')$ and (2) if $c$ was directly below an option $b \notin W$. then $W \in F(V', k)$
 \end{enumerate}
 
 \section{Committee monotonicity}
 \begin{enumerate}
-\item 
-\item 
+\item If a size of a committee is increased, options selected earlier should not be removed.
+\item For any profile of voters $V$: (1) if $W \in F(V, k)$, then there is a set $W'$ such that $W' \in F(V, k+1)$ and $W \subseteq W'$ 
 \end{enumerate}
 
 \section{Solid coalitions}
 \begin{enumerate}
 \item 
-\item 
+\item For any profile of voters $V$ and $l \leq card(C)$: if $c$ is the best candidate for at least $\frac{card(V)}{k}$ voters, then $c \in W$ for any $W \in F(V, k)$.
 \end{enumerate}
 
 \section{Consensus Committee}
 \begin{enumerate}
 \item 
-\item 
+\item For any set of voters $V$, if there is a $k$-set of options $W$ such that each voter prefers an option $w \in W$ and each $w \in W$ is preferred by at least $\frac{card(V)}{k}$ voters, then $F(V, k) = W$. 
 \end{enumerate}
 
 \section{Unanimity}
 \begin{enumerate}
-\item 
-\item 
+\item A set strongly preferred by all voters should be elected.
+\item For any profile of voters $V$: if all voters $v \in V$ rank the same $k$-set of options $W$ on top, then $W \in F(W, k)$
 \end{enumerate}
 
 \section{Fixed majority}
 \begin{enumerate}
-\item 
-\item 
+\item This axiom is inspired by Condorcet principle. If all options in a set are preferred over all non-members of this set by a majority of voters, this set should be elected.
+\item For any profile of voters $V$, if there is a $k$-set of options $W$ 
 \end{enumerate}
 
-\section{Condorcet extension}
-\begin{enumerate}
-\item 
-\item 
-\end{enumerate}
+
 
 \end{document}
