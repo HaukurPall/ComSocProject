@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
-
-pdflatex framework_proposal.tex </dev/null
+FILENAME=project
+pdflatex ${FILENAME}.tex </dev/null
+bibtex ${FILENAME}.aux </dev/null
+pdflatex ${FILENAME}.tex </dev/null
+pdflatex ${FILENAME}.tex </dev/null
