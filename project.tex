@@ -8,6 +8,8 @@
 
 % Use the postscript times font!
 \usepackage{times}
+\def\one{\mbox{1\hspace{-4.25pt}\fontsize{12}{14.4}\selectfont\textrm{1}}} % 11pt    
+
 
 % the following package is optional:
 %\usepackage{latexsym}
@@ -150,7 +152,9 @@ For each consumer we only count the value from the news items that are actually 
 Of course, Equation 1 is trivially solved by $W=A$. 
 But the interest in solving it comes from adding the budget constraint.
 \begin{equation}
-\max_W \sum_{j=1}^n \sum_{i=1}^m \one [a_i\in W] V(\mathbf{R}, n_j, a_i) \text{ subject to } \sum_{a_i \in W} C(a_i) \leq B
+\max_W \sum_{j=1}^n \sum_{i=1}^m \one [ a_i \in W ]
+ V( \mathbf{R}, n_j, a_i) 
+ { s.t. } \sum_{a_i} \in W C(a_i) \leq B
 \end{equation}
 
 This problem, however, is the well-studied {\em 0-1 Knapsack} problem. 
