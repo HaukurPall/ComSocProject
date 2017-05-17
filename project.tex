@@ -143,15 +143,15 @@ given the items' costs as well as the budget, as a maximization problem.
 What we try to maximize is the sum of all the consumers' values by choosing $W$, 
 where a consumer's value of seeing some item in $W$ is represented by a vector $\mathbf{s}$. 
 For each consumer we only count the value from the news items that are actually in the recommended set:\\
-\begin{equation}
+\[
 \max_W \sum_{j=1}^n \sum_{i=1}^m \one [a_i\in W] V(\mathbf{R}, n_j, a_i)
-\end{equation}
+\]
 
 Of course, Equation 1 is trivially solved by $W=A$. 
 But the interest in solving it comes from adding the budget constraint.
-\begin{equation}
+\[
 \max_W \sum_{j=1}^n \sum_{i=1}^m \one [a_i\in W] V(\mathbf{R}, n_j, a_i) \text{ subject to } \sum_{a_i \in W} C(a_i) \leq B
-\end{equation}
+\]
 
 This problem, however, is the well-studied {\em 0-1 Knapsack} problem. 
 Given a set of items, each with a weight and a value, 
