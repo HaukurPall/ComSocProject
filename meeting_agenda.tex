@@ -1,0 +1,78 @@
+\documentclass[10pt,a4paper, english]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\author{
+    Haukur J{\'o}nnson\\    \texttt{haukurpalljonsson@gmail.com}
+    \and
+    Silvan Hungerb{\"u}hler\\   \texttt{silvan.hungerbuehler@bluewin.ch}
+    \and
+    Grzegorz Lisowski\\  \texttt{grzegorz.adam.lisowski@gmail.com}
+    \and
+    Max Rapp\\  \texttt{maxgrapp@gmail.com}
+}
+
+
+\title{%
+  COMSOC: Meeting agenda}
+
+\usepackage{mathptmx} % "times new roman"
+\usepackage{amssymb}
+\usepackage{amsmath, amsthm}
+\usepackage{amsfonts}
+\usepackage{enumitem}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{comment}
+%\usepackage[margin=1in]{geometry}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{color}
+
+\usepackage[normalem]{ulem}
+\date{}
+
+\newcommand{\haukur}[1]{\textcolor[rgb]{.8,.33,.0}{[TB: #1]}}% prints in orange
+\newcommand{\Max}[2]{\textcolor[rgb]{.15,.73,.12}{[Max: #1]}}%green
+
+\begin{document}
+\maketitle
+
+\section{What have we done so far (15 minutes)}
+\begin{itemize}
+\item We have discussed several voting rules and desirable properties of the winner set and how they relate.
+
+Need to explain our model. Voters/consumers, candidates/articles, preference orders, costs function.
+
+\item We have done a survey of the literature, especially looking at multiwinner rules, condorcet based methods and budgeted social choice.
+
+Explain the literature we read on k-winner voting rules and explain that k-winners are not our criteria, but rather budget.
+
+Why not use C\&C or Monroe. We considered Skowron but decided that representation is also not important since we assume that everyone reads everything.
+
+Elkind 2017 our primary paper now
+
+\item We have prepared an outline to our project.
+\end{itemize}
+
+\section{What issues can you help us with? (25 minutes)}
+\begin{itemize}
+\item We would like feedback on voting rules. In particular, we abandoned multiwinner rules. Is this the correct way to go?
+\item The Schultze rule is interesting, but we haven't discussed it in class. Why not?
+\item Our voting rules.
+\item Properties of the winning set, including our proposal. What conditions should such a set meet?
+
+Talk about interesting axioms which Greg found
+
+\item Should we focus on simulations or proofs? Should we generate data or attempt to find it?
+
+\end{itemize}
+
+\section{Plans for completing the project? (15 minutes)}
+\begin{itemize}
+\item Implement the voting rules.
+\item Gather or generate some data.
+\item Compare performance of voting rules w.r.t. desirable properties.
+\item Run simulations and, if appliccable, attempt proofs.
+\end{itemize}
+\end{document}
