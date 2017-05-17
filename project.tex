@@ -11,6 +11,7 @@
 \def\one{\mbox{1\hspace{-4.25pt}\fontsize{12}{14.4}\selectfont\textrm{1}}} % 11pt    
 
 \usepackage{amsmath}
+\DeclareMathOperator*{\argmax}{arg\,max}
 % the following package is optional:
 %\usepackage{latexsym}
 
@@ -79,11 +80,31 @@ Some questions we would like to ask Ulle:
 The following are a bunch of things we would like a recommendation mechanism to do.
 We will describe these desiderata formally and describe their relation and relevance to our goal stated in the introduction.
 \subsection{Desirables}
-\subsubsection{Regret Mbinimization}
-\subsubsection{Minority Consistency}
+\subsubsection{Regret Minimization}
+
+Let $\mathcal {W_B}$ be the set of all budget-compatible elements of $\mathcal{P}(A)$. Regret is minimized (or utility is maximized) if:
+
+\[
+W=\argmax_{W'\in \mathcal{W_B}}(u(W')) 
+\]
+
+
+\subsubsection{$\theta$-Minority Consistency}
+
+Let a : b denote the majority contest between alternatives $a$ and $b$ and $\#_a(a:b)\in [0,1]$ the share of the vote that $a$ wins against $b$ in that contest. A recommendation set is $\theta$-minority consistent if \[a\in W\text{ whenever } \#_a(a:b)\geq \theta \text{ for all } b\in A\setminus \{b\} \]
+
+\subsubsection{$\delta$-Equality}
+
+Define the Gini-coefficient of a recommendation set as follows: 
+
+\[G(W)=\frac{\displaystyle{\sum_{i=1}^n \sum_{j=1}^n \left| u_i - u_j \right|}}{\displaystyle{2n\sum_{i=1}^n u_i}}\]
+
+For $\delta\in [0,1]$, a recommendation set is $\delta$-egalitarian if $G(W)\leq \delta$. 
+
 \subsubsection{Cost Distribution}
+
 There are two polar extremes here:
-One one end one could conceive a rule that picks chunky, expensive items (long, in-depth articles);
+On one end one could conceive a rule that picks chunky, expensive items (long, in-depth articles);
  on the other end rules that pick snacky, cheap items (Vice).
  In principle, any distribution over article prices is conceivable.
  \subsubsection{A bunch of more rules we yet have to get from the article.} 
