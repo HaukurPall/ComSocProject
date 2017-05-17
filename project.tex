@@ -10,7 +10,7 @@
 \usepackage{times}
 \def\one{\mbox{1\hspace{-4.25pt}\fontsize{12}{14.4}\selectfont\textrm{1}}} % 11pt    
 
-
+\usepackage{amsmath}
 % the following package is optional:
 %\usepackage{latexsym}
 
@@ -121,7 +121,6 @@ Has many nice properties and is closely related to the $20\%$ minimal requiremen
 
 Computationally feasible.
 
-\subsection{$\theta$-rule}
 
 \subsection{Extended $\Theta$-Smith}
 
@@ -138,6 +137,17 @@ satsfied we need to iterate over the interval in which the cost restriction brea
  restrictions (when found, there might be multiple.).
 
 Computationally feasible.
+
+\subsection{$\theta$-rule}
+
+Instead of a Condorcet Committee, we could elect the \emph {set of $\theta$-winners} $\Theta$, that is the set
+of all alternatives that win at least $\theta \% $ in all majority contests. Given the budget constraint, we
+choose the smallest $\theta$ that is still compatible with the budget.
+
+We define $\Theta$ as follows: let $a:b$ denote the majority contest between a and b and $\#_a(a:b)\in [0,1]$ the
+share of the vote that a wins against b in that contest. Then $\Theta=\{a\in A: \text { for all } b\in A, \#_a(a:b)\geq \theta\}$. Then W=$\Theta$ subject to the following optimization problem:
+
+\[\min \theta \text{ subject to } \sum_{a_i\in W}c(a_i)\leq B\]
 
 \subsection{Utility Optimization}
 We could also cast the problem of coming up with the best recommendation, 
