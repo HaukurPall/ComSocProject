@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amssymb}
 \title{Multiwinner axioms}
+\newcommand{\Max}[2]{\textcolor[rgb]{.15,.73,.12}{[Max: #1]}}%green
 \author{Grzegorz Lisowski}
 \begin{document}
 \maketitle
@@ -11,59 +12,86 @@ In this piece I simply extract axioms mentioned by Elkind with their formalizati
 \item Every $k$-set of items might win the elections.
 \item For any set of alternatives $C$ and any $k$-subset of $C$ $W$ there is a profile $V$ such that $F(V, k)=C$
 \item We like. Need to adjust this axiom s.t. given a winning set of a rule, we should not be able to add another candidate to our winning set and still satisfy the budget constraints. It should be efficient.
+
 \end{enumerate}
+
+Max: {Hm. I guess this axiom (in the form presented here) is failed by any budgeted optimization rule? If an item has cost above the budget, there is no way to put it into the winner set no matter the profile. I don't see this as a problem, since a budget is just a way of excluding certain winner sets. So I don't think we need to care about this axiom.}
 
 \section{Consistency}
 \begin{enumerate}
 \item For any pair of profile of voters $V_1$, $V_2$: if $V_1 \cap V_2 \neq \emptyset$, then $F(V_1+V_2, k)=F(V_1) \cap F(V_2, k)$
 \item We like. Test this by simulating?
+
 \end{enumerate}
+
+Max: {I also think this is nice to have, especially since in application you would expect dynamics like new readers signing up for the service. I'm not entirely sure how the $\theta$-rule will behave wrt this axiom. I'm thinking of cases where one profile has a low $\theta$ and the other a high $theta$ and some alternative $a$ makes it into the winner sets of both. The new winner set  $F(V_1+V_2)$ will presumably (?) have a $\theta$ somewhere in between. Will $a$ then be in it or not? So I also think we should simulate this.}
 
 \section{Homogeneity}
 \begin{enumerate}
 \item Profiles of voters of the same structure should provide the same outcome.
 \item For any profile of voters $V$ and any $n \in \mathbb{N}$: $F(t*V, k)=F(V, k)$
 \item We like.
+
 \end{enumerate}
+
+Max: {I think we should have this axiom and i see no reason why any of our rules would fail it.}
 
 \section{Monotonicity}
 \begin{enumerate}
 \item If an option belongs to a winning set, she should also be in a winning set if she receives additional support.
 \item For any profile of voters $V$ and any $c \in C$ such that $c \in W$, where $W \in F(V, k)$, for any profile $V'$ obtained from $V$ by putting $c$ one position higher in one of the votes: (1) $c \in W'$, where $W' \in F(V')$ and (2) if $c$ was directly below an option $b \notin W$. then $W \in F(V', k)$
 \item We like.
+
 \end{enumerate}
+
+Max: {I don't completely understand the formalization here. Shouldn't it be $W\subseteq F(V,k)$? Again, especially given dynamics in application (reader preferences might change), this axiom is nice to have.}
 
 \section{Committee monotonicity}
 \begin{enumerate}
 \item If a size of a committee is increased, options selected earlier should not be removed.
 \item For any profile of voters $V$: (1) if $W \in F(V, k)$, then there is a set $W'$ such that $W' \in F(V, k+1)$ and $W \subseteq W'$
 \item We like.
+
 \end{enumerate}
+
+Max: {As we discussed during the class on k-winner elections, I think this will likely fail and it is not really important to us since we care about the budget and utility and not about the number of articles.}
 
 \section{Solid coalitions}
 \begin{enumerate}
 \item For any profile of voters $V$ and $l \leq card(C)$: if $c$ is the best candidate for at least $\frac{card(V)}{k}$ voters, then $c \in W$ for any $W \in F(V, k)$.
 \item A weaker case of Unanimity. We could rank Unanimity and Solid coalitions more generally.
+
 \end{enumerate}
+
+Max: {what is $l$ here? Is this axiom equivalent to the $\theta$-minority axiom we discussed?}
 
 \section{Consensus Committee}
 \begin{enumerate}
 \item For any set of voters $V$, if there is a $k$-set of options $W$ such that each voter prefers an option $w \in W$ and each $w \in W$ is preferred by at least $\frac{card(V)}{k}$ voters, then $F(V, k) = W$.
+
 \end{enumerate}
+
+Max: {I don't understand how this differs from Solid coalitions in the present formulation. Does "prefer" here mean "rank first"? Again, how does this relate to $\theta$-minority consistency? It seems to be a weaker version in that it only applies when there is "consensus" as described in the axiom?}
 
 \section{Unanimity}
 \begin{enumerate}
 \item A set strongly preferred by all voters should be elected.
 \item For any profile of voters $V$: if all voters $v \in V$ rank the same $k$-set of options $W$ on top, then $W \in F(W, k)$
 \item We like, greatly.
+
 \end{enumerate}
+
+Max: {I think there is something wrong with the formalization here. Should it not be $F(C,k)=W$? We definitely want that axiom and I think it should hold for our rules.}
 
 \section{Fixed majority}
 \begin{enumerate}
 \item This axiom is inspired by Condorcet principle. If all options in a set are preferred over all non-members of this set by a majority of voters, this set should be elected.
 \item For any profile of voters $V$, if there is a $k$-set of options $W$
 \item We like, can adjust to $\Theta$ majority with our rule.
+
 \end{enumerate}
+
+Max: {Formalization is incomplete. Since the $\theta$-rule has a stronger requirement, it should always fulfil this for the $\theta$-case. }
 
 Here I try to adjust the Elkind axioms to the setting dealing with the budget constraints. Let $cost(W)$ be a sum of costs of all options $w \in W$ and $B$ be the total budget.
 \section{Nonimposition}
