@@ -25,4 +25,26 @@ $$ u(W^*) > u(W_1) > \dots > u(w_n)$$
 Now consider an election with a profile of voters $t*V$ and budget $B$. Further notice that for any $W_i$, utility of $W_i$ for profile $t*V$ amounts to $t*u(W_i)$. Hence, the hierarchy of utilities is preserved and therefore $W^*$ remains a winner.
 \subsection{$\theta$-minimization rules}
 Again, consider any set of voters $V$ and a budget $B$. Also, let $F(V, B) = W$. Notice that in the profile $t*V$ all options received support which does not affect the proportions of their generated utility. Hence, the results of pairwise contests are preserved. So, $W$ remains the best subset satisfying $B$ in terms of $\theta$ minimization. So $F(V, B) = F(t*V, B)$.
+
+\section{Monotonicity}
+
+\subsection{Utility Maximization}
+
+Consider a profile of voters and alternatives $R$ a cost function $C$ and a budget $B$. Let $F$ be the utility maximization rule and let $W\in F(R,B)$. Denote by $u_R$ the utility function that is defined in the obvious way for alternatives as well as sets of alternatives. Consider an alternative $c\in W$ and some $a\in A$ and reader $i\in N$  $a\succ_i c$ where $a,i$ are immediate neighbours. Denote by $R'$ the profile that coincides with R except that $a\succ_i a$, where where $a,i$ are immediate neighbours.
+
+Then we claim that
+\begin{enumerate}
+\item $c\in W'$
+\item $W\in F(R',B)$ if $a\notin W$
+\end{enumerate}
+Proof:
+
+\begin{enumerate}
+\item Note that either $c,a \in W$ (I) or $a\notin W$ (II). For (II) the desired result is immediate. For (I), note that from the way we defined $R'$ by a mere swap it follows that $u_{R'}(\{a,c\})=u_R(\{a,c\})$. Note in addition that if $a\in W'$ then a fortiori $c\in W'$ since $u_{R'}(b)=u_R(b)$ for all $b\in W\setminus \{a,b\}$. Hence suppose that $a,c\notin W'$. Then, since $W'$ is utility maximizing, there must be some set of alternatives $X\subseteq A\setminus W$ s.t. $C(X)\leq C(\{a,c\})$ and $u_{R'}(W\setminus)\{a,c\}\cup X)>u(W)$. Equivalently \[u_{R'}(W)-u_{R'}(\{a,c\})+u_{R'}(X)>u_{R'}(W)\] But $u_{R'}(W)=u_{R}(W)$ since $u_{R'}(\{a,c\})=u_R(\{a,c\})$ and $u_R'(w)=u_R(w)$ for all $w\in W\setminus \{a,c\}$. And $u_R'(X)=u_R(X)$ since nothing outside $W$ was changed. Hence \[u_V(W)-u_V(\{a,c\})+u_V(X)>u_R(W)\] But then $W$ is not utility maximising given $B$ - a contradiction.
+
+\item Suppose $b\notin W$. Since $W$ is utility maximizing given $B$, for any $d\notin W$ and any $S$ s.t. $d\in S$ and $C(S)\leq  B$, either $u_R(S)\leq u_R(W)$ (I) or $C_R(S)>C_R(W)$ (II). For (I), since $u_{R'}(S) \leq  u_{R}(S)+ u_{R'}(a)- u_{R}(a)= u_{R'}(W)$ by utility maximization of $W$ and since the same tie-breaking applies, $W\in F(R',B)$. For (II), since $C$ is unchanged, the desired result is immediate.
+
+\end{enumerate}
+
+
 \end{document}
