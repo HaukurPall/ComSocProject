@@ -1,0 +1,28 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\title{Multiwinner rules: proofs of axioms}
+\begin{document}
+\maketitle
+
+\section{Unanimity axiom}
+I will show one counterexample for both utility maximization and $\theta$-minimization rules.
+
+Consider elections with budget $B=10$, a set of items with corresponding costs $X= \{x_1:9, x_2:2, x_3:2, x_4:2, x_5:2\}$ and a following profile of users:
+\begin{itemize}
+\item 2 voters: $x_1 > x_2 >x_3 > x_4 > x_5$
+\end{itemize}
+ Notice that following the unanimity axiom $\{x_1 \}$ should be elected. This is the case because it fits into the budget, no other option can be added to this set not exceeding it and all voters rank it on top. But it is not the set chosen neither by the utility maximization nor by $\theta$-minimization rule.
+ 
+\begin{enumerate}
+\item The set $\{x_2, x_3, x_4 x_5 \}$ also fits into the budget, but it clearly generates more utility than $\{ x_1\}$ (it gets 12 Borda points while $\{ x_1\}$ only gets 8). So it will rather be elected than $\{x_1 \}$. 
+\item Notice that as $x_1$ wins against any other item in a pairwise contest, $\{x_1 \}$ is granted $\theta$ of 100 \%. Therefore, any other set satisfying the budget will have a lower $\theta$. So set $\{x_2, x_3, x_4 x_5 \}$ will rather be elected than $\{x_1 \}$.
+\end{enumerate}
+\section{Homogeneity axiom}
+I will show that homogeneity holds for both utility maximization and $\theta$-minimization rules.
+\subsection{Utility Maximization}
+Consider any set of voters $V$ and a budget $B$. Consider a ranking of subsets of options satisfying $B$ based on their generated utility:
+$$ u(W^*) > u(W_1) > \dots > u(w_n)$$
+Now consider an election with a profile of voters $t*V$ and budget $B$. Further notice that for any $W_i$, utility of $W_i$ for profile $t*V$ amounts to $t*u(W_i)$. Hence, the hierarchy of utilities is preserved and therefore $W^*$ remains a winner.
+\subsection{$\theta$-minimization rules}
+Again, consider any set of voters $V$ and a budget $B$. Also, let $F(V, B) = W$. Notice that in the profile $t*V$ 
+\end{document}
