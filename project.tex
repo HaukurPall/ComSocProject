@@ -11,6 +11,7 @@
 \def\one{\mbox{1\hspace{-4.25pt}\fontsize{12}{14.4}\selectfont\textrm{1}}} % 11pt    
 
 \usepackage{amsmath}
+\usepackage{hyperref}
 \DeclareMathOperator*{\argmax}{arg\,max}
 % the following package is optional:
 %\usepackage{latexsym}
@@ -73,14 +74,19 @@ The present paper takes a step towards solving this problem by designing and tes
  By way of example, if all consumers detest a certain news item, 
  then it should certainly not be featured in the essential collection instead of another item much liked by everybody.
  
-Our idea then consists in formally studying the interaction of recommendation mechanisms and desirable properties. 
-We employ formal frameworks from the theory of \emph{Computational Social Choice} to state the problem
-and proceed by proving theorems and presenting empirical results from simulations we have run.  
+This paper aims at better understanding of collective recommendation mechanisms in media settings by
+formally studying the interaction of mechanisms and properties of what they recommend. 
+We employ formal tools provided by \emph{Social Choice Theory} to to analyze benefits and drawbacks of various possible ways to determine a set of essential news items 
+- e.g. newspaper articles - for a group, given each member's individual preferences over the topics - eg. politics, sport, business.
+We proceed by proving a small number of theorems and running simulations to estimate empirical relationships where proofs are unobtainable.  
 
- Namely, given a profile of individual preference orders, repeated application of a social choice function will be used fill a set of essential readings. This set should constitute a "common core" that we suggest should form a subset of any recommendation.
+The paper is structured as follows: \hyperlink{framework}{Section 2} we provide the formal definition of the recommendation problem as we want to study it. 
+In \hyperlink{axioms}{Section 3} we formally present the desirable properties a collection of recommended articles ought to have. 
+In \hyperlink{rules}{Section  4} we propose three rules for the task of turning individual preferences into recommendations. 
+\hyperlink{test}{Section 5} contains the presentation and discussion of our simulation results as well as the theorems, while
+\hyperlink{conclusion}{Section 6} concludes.
 
-Our project aims at better understanding of collective recommendation mechanisms in media settings. We want to use formal tools provided by Social Choice Theory to analyze benefits and drawbacks of various possible ways to determine a set of essential news items - e.g. newspaper articles - for a group, given each member's individual preferences over the topics - eg. politics, sport, business - instantiated by the items.
-%This is how you {\it do italics}.
+%This is how you {\it do italics}
 
 %And this is how you {\em emphasize}
 %Reference to Section~\ref{intro}
@@ -94,7 +100,7 @@ Our project aims at better understanding of collective recommendation mechanisms
 %Footnote\footnote{blurg}
 
 %A bold {\bf letter}
-\section{Formal Framework}\label{framework}
+\section{Formal Framework}\hypertarget{framework}
 We have a set of {\emph news items} $A=\{a_1,...,a_m\}$, 
 each having a specific {\emph cost}
  $C: A \rightarrow {\mathbf R}$,  %this should really b \mathbf but it wont compile
@@ -114,7 +120,7 @@ $V$ would be akin to a Borda scoring rule, for example, in the concrete case
 Concerning {\emph social value}, then, there are two fundamental positions one could take. On the one hand, one a {\emph utilitarian} view we could measure social welfare as the sum of each all consumers' individual value. On the other, one could also adopt some {\emph egalitarian} point of view which takes the differences between consumers' values into account.
 
 
-\section{Desirables \& Dimensions of Performance}\label{desirables}
+\section{Desirables \& Dimensions of Performance}\hypertarget{axioms}
 The following are a bunch of things we would like a recommendation mechanism to do.
 We will describe these desiderata formally and describe their relation and relevance to our goal stated in the introduction.
 \subsection{Desirables}
@@ -148,8 +154,7 @@ On one end one could conceive a rule that picks chunky, expensive items (long, i
  \subsubsection{A bunch of more rules we yet have to get from the article.} 
 
 
-\section{Recommendation Rules}
-
+\section{Recommendation Rules}\hypertarget{rules}
 %Referencing ~\shortcite{Elkind2015} in text. Speaking about work ~\cite{Elkind2015}.
 Here come a bunch of voting rules that we think will perform well with respect to above desiderata.
 %\subsection{Haukur's work}
@@ -231,18 +236,16 @@ and the maximal load corresponds to our budget $B$.
 
 Although the optimization problem is NP-hard, there exists pseudo-polynomial algorithms using dynamic programming 
 as well as polynomial-time approximation schemes. 
-
-\section{Simulations}
+\section{Simulations}%\hypertarget{test}
 \subsection{Method}
 \subsection{Results}
 \subsection{Discussion}
 \subsection{Proofs}
+%\section{Conclusion}\hypertarget{conclusion}
 
-\section{Conclusion}
 
 %% The file named.bst is a bibliography style file for BibTeX 0.99c
-\bibliographystyle{named}
-\bibliography{references}
-
+%\bibliographystyle{named}
+%\bibliography{references}
 \end{document}
 
