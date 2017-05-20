@@ -37,11 +37,11 @@
 
 \title{Collective Recommendations}
 \author{
-    Haukur J{\'o}nsson \\    \texttt{haukurpalljonsson@gmail.com}
+    Haukur J{\'o}nsson \\    \texttt{haukurpalljonsson@gmail.com}\\
     \and
-    Silvan Hungerb{\"u}hler \\   \texttt{silvan.hungerbuehler@bluewin.ch}
+    Silvan Hungerb{\"u}hler \\   \texttt{silvan.hungerbuehler@bluewin.ch}\\
     \and
-    Grzegorz Lisowski \\  \texttt{grzegorz.adam.lisowski@gmail.com}
+    Grzegorz Lisowski \\  \texttt{grzegorz.adam.lisowski@gmail.com}\\
     \and
     Max Rapp \\  \texttt{maxgrapp@gmail.com}
 }
@@ -55,12 +55,31 @@ This is a placeholder for the glorious abstract yet to come.
 \end{abstract}
 
 \section{Introduction}\label{introduction}
-Some questions we would like to ask Ulle:
-\begin{itemize}
-\item What's his opinion of Schultze? What is his opinion, in general, about the rules we picked, especially wrt fact that we abandoned multiwinner rules which are solely constrained by cardinality?
-\item Proofs vs. Simulations
-\item  What's his opinion on the desirable properties we have come up with?
-\end{itemize}
+Media are in crisis. Between highly personalized social media - as Facebook or Twitter - that drive political 
+fragmentation, partizanship and the absence of a common factual base in society on the one hand, 
+and waning interest in the traditional, entirely unpersonalized newspaper on the other, there is little space to maneuver for news providers. 
+ How to balance the publics demand for news that is relevant to collective interests of both large and small groups in society and, at once, 
+ reflects individual interests.
+ 
+The present paper takes a step towards solving this problem by designing and testing a number of recommendation mechanism for news articles. 
+ Based on the tastes consumers have for particular news items, the mechanism constructs a collection of essential articles for the entire group. 
+ All that is needed for the mechanism to work is an ordering of the news items from first to last for each individual. 
+ The way in which this preference ordering is elicited from the individual need not be of concern here; 
+ depending on the concrete application, the data can be thought of s explicitly provided by the consumers or gathered by data mining techniques.
+ 
+ Naturally, there are certain properties one would expect such a collection of essential articles to have. 
+ The total length of recommended articles for a newspapers title page, for example, should not exceed its character limit. 
+ Likewise, there are relations between the essential articles and the rankings by the individuals one would like to see respected by a recommendation mechanism. 
+ By way of example, if all consumers detest a certain news item, 
+ then it should certainly not be featured in the essential collection instead of another item much liked by everybody.
+ 
+Our idea then consists in formally studying the interaction of recommendation mechanisms and desirable properties. 
+We employ formal frameworks from the theory of \emph{Computational Social Choice} to state the problem
+and proceed by proving theorems and presenting empirical results from simulations we have run.  
+
+ Namely, given a profile of individual preference orders, repeated application of a social choice function will be used fill a set of essential readings. This set should constitute a "common core" that we suggest should form a subset of any recommendation.
+
+Our project aims at better understanding of collective recommendation mechanisms in media settings. We want to use formal tools provided by Social Choice Theory to analyze benefits and drawbacks of various possible ways to determine a set of essential news items - e.g. newspaper articles - for a group, given each member's individual preferences over the topics - eg. politics, sport, business - instantiated by the items.
 %This is how you {\it do italics}.
 
 %And this is how you {\em emphasize}
@@ -75,7 +94,7 @@ Some questions we would like to ask Ulle:
 %Footnote\footnote{blurg}
 
 %A bold {\bf letter}
-\section{Formal Framework}
+\section{Formal Framework}\label{framework}
 We have a set of {\emph news items} $A=\{a_1,...,a_m\}$, 
 each having a specific {\emph cost}
  $C: A \rightarrow {\mathbf R}$,  %this should really b \mathbf but it wont compile
