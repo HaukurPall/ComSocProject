@@ -1,7 +1,7 @@
 # Authors: Haukur Pall Jonsson, Silvan Hungerbuhler, Max Rapp and Greg Liowski
 # Date: 20th May 2017
 import copy
-import unittest
+import math
 import argparse
 
 
@@ -135,8 +135,8 @@ class VotingRule:
             if moneyh_to_spend - cost_vector[candidate] < 0:
                 # we can't afford more stuff - but there might be a cheaper candidate down the line.
                 continue
-            # we essentially mark it
-            candidate_scores[candidate] = -1
+            # we essentially mark it as terrible
+            candidate_scores[candidate] = -math.inf
             winners.append(candidate)
             moneyh_to_spend -= cost_vector[candidate]
         return winners
@@ -160,11 +160,11 @@ class BordaRule(VotingRule):
     def get_winners(self, profile, budget, cost_vector):
         candidate_scores = [0] * profile.number_of_candidates
         for preference_order in profile:
-            score = profile.get_number_of_candidates() - 1
+            score = profile.number_of_candidates - 1
             for candidate in preference_order:
                 candidate_scores[candidate] += score
                 score -= 1
-        self.cut_score(budget, candidate_scores, cost_vector)
+        return self.cut_score(budget, candidate_scores, cost_vector)
 
 
 class CopelandRule(VotingRule):
