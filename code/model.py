@@ -217,16 +217,6 @@ def create_cost_distribution(number_of_candidates, cost_distribution, distributi
         raise Exception("Illegal cost distribution: " + str(cost_distribution))
 
 
-class Tests(unittest.TestCase):
-    def test_winner_determination_k_plurality(self):
-        profile = read_preferences("test_preferences_txt")
-        rule = initialize_rule(0)
-        cost = create_cost_distribution(profile.number_of_candidates, 0, 1)
-        winner_set = rule.get_winners(profile, 10, cost_vector=cost)
-        self.assertEqual(len(winner_set), 10)
-        self.assertEqual(sum(cost), 10.0)
-
-
 def main():
     parser = argparse.ArgumentParser(description='Computes the winner of given profile')
     group = parser.add_mutually_exclusive_group()
@@ -252,4 +242,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    unittest.main()
