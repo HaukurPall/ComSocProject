@@ -1,6 +1,7 @@
 # Authors: Haukur Pall Jonsson, Silvan Hungerbuhler, Max Rapp and Greg Liowski
 # Date: 20th May 2017
 import copy
+import random
 import math
 import argparse
 import data
@@ -52,6 +53,20 @@ class Preference:
         for preference in list_of_preferences:
             old_order.remove(preference)
         return Preference(old_order + list_of_preferences)
+
+    """
+    Generates a random preference order over a uniform distribution.
+    """
+    @staticmethod
+    def generate_random_preference_order(m):
+        preference_set = set([x for x in range(0, m)])
+        preference_list = random.sample(preference_set, m)
+        return Preference(preference_list)
+
+    def index_based_swap(self, candidate_index, other_candidate_index):
+        tmp = self.preference_order[candidate_index]
+        self.preference_order[candidate_index] = self.preference_order[other_candidate_index]
+        self.preference_order[other_candidate_index] = tmp
 
     def get_copy(self):
         order = copy.deepcopy(self.preference_order)
@@ -265,13 +280,13 @@ def create_cost_distribution(number_of_candidates, cost_distribution, distributi
     else:
         raise Exception("Illegal cost distribution: " + str(cost_distribution))
 
-
 def main():
     from argparse import RawTextHelpFormatter
     parser = argparse.ArgumentParser(description='Computes the winner of given profile',
                                      formatter_class=RawTextHelpFormatter)
-    parser.add_argument('preferences', help='A file containing the preferences. '
-                                            'The file needs to be formatted correctly')
+    parser.add_argument('preferences', help='A filepath either containing preferences or it does not exist\n'
+                                            'If the param "write" is used then the generated preferences will be outputted there.')
+    parser.add_argument('--write', action='store_true', help="Set if the generated profile should be saved to a file")
     parser.add_argument('-c', '--cost', type=int, default=0, help='The cost distribution to use over candidates\n'
                                                                   '0 = uniform cost of 1 for item')
     parser.add_argument('-r', '--rule', type=int, default=0, help='The rule to decide the winner\n'
@@ -280,20 +295,29 @@ def main():
                                                                   '2 = copeland\n'
                                                                   '3 = knapsack\n')
     parser.add_argument('-b', '--budget', type=int, default=10, help='The total budget to be used')
+    parser.add_argument('--voters', type=int, default=10, help='The number of voters')
+    parser.add_argument('--candidates', type=int, default=10, help='The number of candidates')
+    parser.add_argument('--base', type=int, default=3, help='The number base preference orders')
+    parser.add_argument('--swaps', type=int, default=1, help='The number of swaps to do for each preference order')
+    parser.add_argument('--noise', type=int, default=2, help='The noise parameter')
     #group = parser.add_mutually_exclusive_group()
     #group.add_argument('-v', '--verbose', action='store_true')
     #group.add_argument('-q', '--quiet', action='store_true')
     args = parser.parse_args()
 
-    profile = data.read_from_file(args.preferences)
-    rule = initialize_rule(args.rule)
-    cost_vector = create_cost_distribution(profile.number_of_candidates, args.cost, 1)
-    winner_set = rule.get_winners(profile, args.budget, cost_vector)
-    total_cost = 0
-    for winner in winner_set:
-        print(str(winner) + " " + str(cost_vector[winner]))
-        total_cost += cost_vector[winner]
-    print(" ".join([str(total_cost), str(args.budget)]))
+    if not args.write:
+        profile = data.read_from_file(args.preferences)
+        rule = initialize_rule(args.rule)
+        cost_vector = create_cost_distribution(profile.number_of_candidates, args.cost, 1)
+        winner_set = rule.get_winners(profile, args.budget, cost_vector)
+        total_cost = 0
+        for winner in winner_set:
+            print(str(winner) + " " + str(cost_vector[winner]))
+            total_cost += cost_vector[winner]
+        print(" ".join([str(total_cost), str(args.budget)]))
+    else:
+        profile = data.create_noisy_data(args.voters, args.candidates, args.base, args.swaps, args.noise)
+        data.write_to_file(args.preferences, profile)
 
 
 if __name__ == "__main__":

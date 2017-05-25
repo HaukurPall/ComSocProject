@@ -24,3 +24,7 @@ The format of the file is like in the preflib.org
     Ballot_1=1,2,...,M
     ...
     Ballot_B=1,2,...,M
+    
+To generate ballots and save to file 'random_profile.txt'
+
+    python3 model.py random_profile.txt --write --voters 11 --candidates 10 --swaps 1 --noise 2 --base 3
