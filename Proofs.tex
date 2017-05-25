@@ -1,5 +1,7 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{amssymb}
 \title{Multiwinner rules: proofs of axioms}
 \begin{document}
 \maketitle
@@ -17,6 +19,19 @@ Consider elections with budget $B=10$, a set of items with corresponding costs $
 \item The set $\{x_2, x_3, x_4 x_5 \}$ also fits into the budget, but it clearly generates more utility than $\{ x_1\}$ (it gets 12 Borda points while $\{ x_1\}$ only gets 8). So it will rather be elected than $\{x_1 \}$. 
 \item Notice that as $x_1$ wins against any other item in a pairwise contest, $\{x_1 \}$ is granted $\theta$ of 100 \%. Therefore, any other set satisfying the budget will have a lower $\theta$. So set $\{x_2, x_3, x_4 x_5 \}$ will rather be elected than $\{x_1 \}$.
 \end{enumerate}
+For the Budgeted Plurality rule consider the following counterexample:
+
+Let Budget=10. Also let $c(x_1)=c(x_2)=c(x_3)=5$. The profile of voters is constructed as:
+
+\begin{itemize}
+	\item 1 voter $x_1 > x_3 > x_2$
+\end{itemize}
+Now notice that that only $x_1$ has any plurality points, so it is elected. Due to room in the budget and lexicographical tie-breaking $x_2$ is also chosen, so $\{ x_1, x_2\}$ is elected. But following the unanimity axiom $\{x_1, x_3\}$ should be elected. 
+
+However, for Budgeted Borda rule the Unanimity axiom holds.
+\begin{proof}
+	  Consider an election $E$ with budget $B$ and a profile of voters $V$ such that there is a set of options $W$ such that $W$ fits the budget maximally and $W$ is ranked as a top set by all voters. Then it is easy to see that any $x \in W$ has more Borda points than any $x' \notin W$. So all $x \in W$ are strictly higher in the ranking than any $x' \notin W$. So all $x \in W$ are elected as they can all fit in the budget together and no other option is elected due to maximality. So $W$ is the winning set. 
+\end{proof}
 \section{Homogeneity axiom}
 I will show that homogeneity holds for both utility maximization and $\theta$-minimization rules.
 \subsection{Utility Maximization}
@@ -25,7 +40,10 @@ $$ u(W^*) > u(W_1) > \dots > u(w_n)$$
 Now consider an election with a profile of voters $t*V$ and budget $B$. Further notice that for any $W_i$, utility of $W_i$ for profile $t*V$ amounts to $t*u(W_i)$. Hence, the hierarchy of utilities is preserved and therefore $W^*$ remains a winner.
 \subsection{$\theta$-minimization rules}
 Again, consider any set of voters $V$ and a budget $B$. Also, let $F(V, B) = W$. Notice that in the profile $t*V$ all options received support which does not affect the proportions of their generated utility. Hence, the results of pairwise contests are preserved. So, $W$ remains the best subset satisfying $B$ in terms of $\theta$ minimization. So $F(V, B) = F(t*V, B)$.
-
+\subsection{Budgeted Borda rule}
+Consider any set of voters $V$ and a budget $B$. Consider a ranking of options  based on their Borda scores. Now consider a profile $t*V$ for some $t \in \mathbb{N}$. Now notice that for any option $x$, Borda score of $x$ in $t*V$ amounts to $t$ times Borda score of $x$ in $V$. So the ranking remains unchanged, so the winning set is preserved. 
+\subsection{Budgeted Plurality rule}
+Proof is symmetric to the proof for Budgeted Borda rule. 
 \section{Monotonicity}
 
 \subsection{Utility Maximization}
