@@ -3,7 +3,7 @@
 import copy
 import math
 import argparse
-
+import data
 
 class Preference:
     """
@@ -68,9 +68,7 @@ class Preference:
 
 
 class Profile:
-    def __init__(self, identifier, description, number_of_voters, number_of_candidates, preference_list):
-        self.identifier = identifier
-        self.description = description
+    def __init__(self, number_of_voters, number_of_candidates, preference_list):
         self.number_of_voters = number_of_voters
         self.number_of_candidates = number_of_candidates
         self.preference_list = preference_list
@@ -78,10 +76,14 @@ class Profile:
             raise Exception("The reported number of voters does not equal the ballot")
         if self.number_of_candidates != preference_list[0].get_number_of_candidates():
             raise Exception("The reported number of candidates does not equal the ballot")
+        unique_preference_set = set()
+        for preference in preference_list:
+            if str(preference) not in unique_preference_set:
+                unique_preference_set.add(str(preference))
+        self.unique_votes = len(unique_preference_set)
 
     def __str__(self):
-        profile = "Identifier: " + self.identifier + "\n"
-        profile += "Description: " + self.description + "\n"
+        profile = ""
         for preference_order_index, preference_order in enumerate(self.preference_list):
             profile += str(preference_order) + "\n"
         return profile
@@ -256,19 +258,6 @@ def initialize_rule(rule):
         raise Exception("Illegal rule number: " + str(rule))
 
 
-def read_preferences(file_path):
-    with open(file_path, "r") as file:
-        file_list = list(file)
-        indentifier = file_list[0].strip()
-        description = file_list[1].strip()
-        number_of_voters = int(file_list[2])
-        number_of_candidates = int(file_list[3])
-        preference_list = []
-        for line in file_list[4:]:
-            preference_list.append(Preference(line.strip().split(" ")))
-        return Profile(indentifier, description, number_of_voters, number_of_candidates, preference_list)
-
-
 def create_cost_distribution(number_of_candidates, cost_distribution, distribution_parameter):
     # uniform
     if cost_distribution == 0:
@@ -296,7 +285,7 @@ def main():
     #group.add_argument('-q', '--quiet', action='store_true')
     args = parser.parse_args()
 
-    profile = read_preferences(args.preferences)
+    profile = data.read_from_file(args.preferences)
     rule = initialize_rule(args.rule)
     cost_vector = create_cost_distribution(profile.number_of_candidates, args.cost, 1)
     winner_set = rule.get_winners(profile, args.budget, cost_vector)

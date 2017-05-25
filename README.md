@@ -12,12 +12,15 @@ For help see
     python3 model.py -h
 
 ### Input
-The input of the program is given with the command line and should be formatted like so:
+To run the program against some ballots just add the filename where the ballot is stored as a command line argument.
 
-    "Preference_identifier" (one word)
-    Some description of the preference
-    number of voters (one integer=N)
-    number of preferences (one integer=M)
-    0 1 10 3 4 7 2 9 8 ... (a preference order with M integers)
+The format of the file is like in the preflib.org
+
+    M=Candidate count
+    Candidate_1=1,candidate_name_1
     ...
-    N lines of preference orders
+    Candidate_M=M,candidate_name_M
+    N,B,U=Voters,Ballots,Unique ballots
+    Ballot_1=1,2,...,M
+    ...
+    Ballot_B=1,2,...,M
