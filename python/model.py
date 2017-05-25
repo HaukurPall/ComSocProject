@@ -185,6 +185,64 @@ class CopelandRule(VotingRule):
         return self.cut_score(budget, candidate_scores, cost_vector)
 
 
+class Knapsack(VotingRule):
+    def __init__(self):
+        super().__init__("Knapsack Optimization", 3)
+
+    def get_winners(self, profile, budget, cost_vector):
+        candidate_scores = [0] * profile.number_of_candidates
+        for preference_order in profile:
+            # instead of using borda scores we use borda score + 1.
+            # This solves a problem when we are finding the knapsack items.
+            score = profile.number_of_candidates
+            for candidate in preference_order:
+                candidate_scores[candidate] += score
+                score -= 1
+        ordered_candidate_cost = [(x, cost_vector[x], candidate_scores[x]) for x in range(len(cost_vector))]
+        # we order the candidates after cost
+        ordered_candidate_cost.sort(key=lambda tup: tup[1])
+        candidates = [tup[0] for tup in ordered_candidate_cost]
+        ordered_cost_vector = [tup[1] for tup in ordered_candidate_cost]
+        # we order the scores according to that ordering
+        values = [tup[2] for tup in ordered_candidate_cost]
+        knapsack_table = solve_knapsack(budget, ordered_cost_vector, values)
+        return get_knapsack_items(knapsack_table, budget, ordered_cost_vector, candidates)
+
+
+def get_knapsack_items(K, weight, weights, candidates):
+    selected_candidates = []
+    current_weight = weight
+    item_number = len(K) - 1
+    while weight != 0 and item_number != 0:
+        if K[item_number][current_weight] != K[item_number - 1][current_weight]:
+            selected_candidates.append(candidates[item_number - 1])
+            weight -= weights[item_number - 1]
+        item_number -= 1
+    return selected_candidates
+
+
+def solve_knapsack(W, weights, values):
+    n = len(weights)
+    K = [[0 for x in range(W + 1)] for x in range(n + 1)]
+    # Build table K[][], the knapsack table, in bottom up manner
+    for item_count in range(n + 1):
+        for weight in range(W + 1):
+            # The knapsack table is padded with one extra row and column
+            lookup_index = item_count - 1
+            # K[0][x] => no items, K[x][0] => no weight
+            if item_count == 0 or weight == 0:
+                K[item_count][weight] = 0
+            # if we can add the item, we should add it if it gives us better results than not
+            elif weights[lookup_index] <= weight:
+                K[item_count][weight] = max(values[lookup_index] + K[item_count - 1][weight - weights[lookup_index]],
+                                            K[item_count - 1][weight])
+            # we can't add it => we use previous items which fit
+            else:
+                K[item_count][weight] = K[item_count - 1][weight]
+
+    return K
+
+
 def initialize_rule(rule):
     if rule == 0:
         return PluralityRule()
@@ -192,6 +250,8 @@ def initialize_rule(rule):
         return BordaRule()
     if rule == 2:
         return CopelandRule()
+    if rule == 3:
+        return Knapsack()
     else:
         raise Exception("Illegal rule number: " + str(rule))
 
@@ -218,22 +278,29 @@ def create_cost_distribution(number_of_candidates, cost_distribution, distributi
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Computes the winner of given profile')
-    group = parser.add_mutually_exclusive_group()
+    from argparse import RawTextHelpFormatter
+    parser = argparse.ArgumentParser(description='Computes the winner of given profile',
+                                     formatter_class=RawTextHelpFormatter)
     parser.add_argument('preferences', help='A file containing the preferences. '
                                             'The file needs to be formatted correctly')
-    parser.add_argument('--cost', type=int, default=0, help='The cost distribution to use over candidates')
-    parser.add_argument('--rule', type=int, default=0, help='The rule to decide the winner. 1=k-plurality')
-    parser.add_argument('--budget', type=float, default=10.0, help='The total budget to be used')
-    group.add_argument('-v', '--verbose', action='store_true')
-    group.add_argument('-q', '--quiet', action='store_true')
+    parser.add_argument('-c', '--cost', type=int, default=0, help='The cost distribution to use over candidates\n'
+                                                                  '0 = uniform cost of 1 for item')
+    parser.add_argument('-r', '--rule', type=int, default=0, help='The rule to decide the winner\n'
+                                                                  '0 = budget-plurality\n'
+                                                                  '1 = budget-borda\n'
+                                                                  '2 = copeland\n'
+                                                                  '3 = knapsack\n')
+    parser.add_argument('-b', '--budget', type=int, default=10, help='The total budget to be used')
+    #group = parser.add_mutually_exclusive_group()
+    #group.add_argument('-v', '--verbose', action='store_true')
+    #group.add_argument('-q', '--quiet', action='store_true')
     args = parser.parse_args()
 
     profile = read_preferences(args.preferences)
     rule = initialize_rule(args.rule)
     cost_vector = create_cost_distribution(profile.number_of_candidates, args.cost, 1)
     winner_set = rule.get_winners(profile, args.budget, cost_vector)
-    total_cost = 0.0
+    total_cost = 0
     for winner in winner_set:
         print(str(winner) + " " + str(cost_vector[winner]))
         total_cost += cost_vector[winner]

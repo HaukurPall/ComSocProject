@@ -7,6 +7,10 @@ Code is in code/model.py and is run using the command line
 
     python3 model.py --cost 0 --rule 0 --budget 100 test_preferences.txt
 
+For help see
+
+    python3 model.py -h
+
 ### Input
 The input of the program is given with the command line and should be formatted like so:
 
