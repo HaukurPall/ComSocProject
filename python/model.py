@@ -6,10 +6,12 @@ import math
 import argparse
 import data
 
+
 class Preference:
     """
     :param list_of_preferences: orderer list of integers, in which integer is a unique candidate, first candidate is 0
     """
+
     def __init__(self, preference_order):
         self.preference_order = [int(x) for x in preference_order]
 
@@ -57,6 +59,7 @@ class Preference:
     """
     Generates a random preference order over a uniform distribution.
     """
+
     @staticmethod
     def generate_random_preference_order(m):
         preference_set = set([x for x in range(0, m)])
@@ -106,13 +109,13 @@ class Profile:
     def __getitem__(self, index):
         return self.preference_list[index]
 
-    def is_x_majority_winner_over_y(self, our_candidate, other_candidate):
+    def is_x_majority_winner_over_y(self, our_candidate, other_candidate, theta=0.5):
         wins = 0
         for preference_order in self.preference_list:
             if preference_order.is_x_more_preferred_than_y(our_candidate, other_candidate):
                 wins += 1
         # strictly greater
-        return float(wins)/float(self.number_of_voters) > 0.5
+        return float(wins) / float(self.number_of_voters) > theta
 
 
 class VotingRule:
@@ -126,12 +129,14 @@ class VotingRule:
     """
     Returns an ordered list of winners
     """
+
     def get_winners(self, profile, budget, cost_vector):
         pass
 
     """
     Returns a winner using a tiebreaker (lexicographically)
     """
+
     @staticmethod
     def break_ties(winners):
         first_winner = min(winners)
@@ -143,6 +148,7 @@ class VotingRule:
     Returns a list of winners using the score and cut method.
     Chooses the highest candidate which does not cost more than the remaining budget.
     """
+
     @staticmethod
     def cut_score(budget, candidate_scores, cost_vector):
         winners = []
@@ -280,6 +286,7 @@ def create_cost_distribution(number_of_candidates, cost_distribution, distributi
     else:
         raise Exception("Illegal cost distribution: " + str(cost_distribution))
 
+
 def main():
     from argparse import RawTextHelpFormatter
     parser = argparse.ArgumentParser(description='Computes the winner of given profile',
@@ -300,9 +307,9 @@ def main():
     parser.add_argument('--base', type=int, default=3, help='The number base preference orders')
     parser.add_argument('--swaps', type=int, default=1, help='The number of swaps to do for each preference order')
     parser.add_argument('--noise', type=int, default=2, help='The noise parameter')
-    #group = parser.add_mutually_exclusive_group()
-    #group.add_argument('-v', '--verbose', action='store_true')
-    #group.add_argument('-q', '--quiet', action='store_true')
+    # group = parser.add_mutually_exclusive_group()
+    # group.add_argument('-v', '--verbose', action='store_true')
+    # group.add_argument('-q', '--quiet', action='store_true')
     args = parser.parse_args()
 
     if not args.write:
