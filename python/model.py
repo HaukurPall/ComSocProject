@@ -335,6 +335,24 @@ class Unanimity(Axiom):
         return winners == unanimous_winners
 
 
+class CommitteeMonotonicity(Axiom):
+
+    def __init__(self, max_budget, increment):
+        super().__init__("Committee Monotonicity", 1)
+        self.max_budget = max_budget
+        self.increment = increment
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        first_winners = rule.get_winners(profile, budget, cost)
+        while budget <= self.max_budget:
+            budget += self.increment
+            winners = rule.get_winners(profile, budget, cost)
+            for winner in first_winners:
+                if winner not in winners:
+                    return False
+        return True
+
+
 def initialize_rule(rule):
     if rule == 0:
         return PluralityRule()
@@ -349,9 +367,12 @@ def initialize_rule(rule):
     else:
         raise Exception("Illegal rule number: " + str(rule))
 
-def initialize_axiom(axiom):
+
+def initialize_axiom(axiom, axiom_parameter_1=200, axiom_parameter_2=1):
     if axiom == 0:
         return Unanimity()
+    if axiom == 1:
+        return CommitteeMonotonicity(axiom_parameter_1, axiom_parameter_2)
     else:
         raise Exception("Illegal axiom number: " + str(axiom))
 
