@@ -304,6 +304,37 @@ class ThetaRule(VotingRule):
         return winners
 
 
+class Axiom:
+
+    def __init__(self, name, number):
+        self.name = name
+        self.number = number
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        pass
+
+
+class Unanimity(Axiom):
+
+    def __init__(self):
+        super().__init__("Unanimity", 0)
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        winners = rule.get_winners(profile, budget, cost)
+        winners.sort()
+        unanimous_winners = []
+        # we assume the profile has unanimous winners
+        for candidate in profile[0]:
+            if budget - cost[candidate] >= 0:
+                unanimous_winners.append(candidate)
+                budget -= cost[candidate]
+            # if adding the next candidate would go over the budget we stop.
+            else:
+                break
+        unanimous_winners.sort()
+        return winners == unanimous_winners
+
+
 def initialize_rule(rule):
     if rule == 0:
         return PluralityRule()
@@ -317,6 +348,12 @@ def initialize_rule(rule):
         return ThetaRule(0.05)
     else:
         raise Exception("Illegal rule number: " + str(rule))
+
+def initialize_axiom(axiom):
+    if axiom == 0:
+        return Unanimity()
+    else:
+        raise Exception("Illegal axiom number: " + str(axiom))
 
 
 def create_cost_distribution(number_of_candidates, cost_distribution, distribution_parameter):
@@ -341,6 +378,8 @@ def main():
                                                                   '1 = budget-borda\n'
                                                                   '2 = copeland\n'
                                                                   '3 = knapsack\n')
+    parser.add_argument('--axiom', type=int, default=0, help='The axiom the check the rule against\n'
+                                                                  '0 = Unanimity\n')
     parser.add_argument('-b', '--budget', type=int, default=10, help='The total budget to be used')
     parser.add_argument('--voters', type=int, default=10, help='The number of voters')
     parser.add_argument('--candidates', type=int, default=10, help='The number of candidates')
@@ -357,11 +396,18 @@ def main():
         rule = initialize_rule(args.rule)
         cost_vector = create_cost_distribution(profile.number_of_candidates, args.cost, 1)
         winner_set = rule.get_winners(profile, args.budget, cost_vector)
-        total_cost = 0
-        for winner in winner_set:
-            print(str(winner) + " " + str(cost_vector[winner]))
-            total_cost += cost_vector[winner]
-        print(" ".join([str(total_cost), str(args.budget)]))
+        axiom = initialize_axiom(args.axiom)
+        satisfied = axiom.is_satisfied(rule, profile, args.budget, cost_vector)
+        if satisfied:
+            print(rule.name + " satisfies " + axiom.name)
+        else:
+            print(rule.name + " does not satisfy " + axiom.name)
+#        total_cost = 0
+#        for winner in winner_set:
+#            print(str(winner) + " " + str(cost_vector[winner]))
+#           total_cost += cost_vector[winner]
+#        print(" ".join([str(total_cost), str(args.budget)]))
+
     else:
         profile = data.create_noisy_data(args.voters, args.candidates, args.base, args.swaps, args.noise)
         data.write_to_file(args.preferences, profile)
