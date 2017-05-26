@@ -117,6 +117,20 @@ class Profile:
         # strictly greater
         return float(wins) / float(self.number_of_voters) > theta
 
+    def compute_pairwise_wins(self):
+        P = [[0 for x in range(self.number_of_candidates)] for x in range(self.number_of_candidates)]
+        for preference_order in self.preference_list:
+            for candidate in range(self.number_of_candidates):
+                for other_candidate in range(self.number_of_candidates):
+                    # majority contest against one self = win, for simplifying later computation
+                    if other_candidate == candidate:
+                        P[candidate][other_candidate] += 1
+                        continue
+                    if preference_order.is_x_more_preferred_than_y(candidate, other_candidate):
+                        P[candidate][other_candidate] += 1
+        P = [[wins/float(self.number_of_candidates) for wins in candidate] for candidate in P]
+        return P
+
 
 class VotingRule:
     def __init__(self, name, number):
@@ -265,6 +279,30 @@ def solve_knapsack(W, weights, values):
 
     return K
 
+class ThetaRule(VotingRule):
+    def __init__(self, increment):
+        super().__init__("Theta rule", 4)
+        self.increment = increment
+
+    def get_winners(self, profile, budget, cost_vector):
+        pairwise_wins = profile.compute_pairwise_wins()
+        winners = []
+        theta = 1.0
+        budget_finished = False
+        while len(winners) != profile.number_of_candidates and not budget_finished:
+            for candidate, candidate_wins in enumerate(pairwise_wins):
+                if min(candidate_wins) >= theta:
+                    if budget - cost_vector[candidate] >= 0:
+                        winners.append(candidate)
+                        # we mark the candidate as terrible after it has been picked
+                        pairwise_wins[candidate] = [-1] * profile.number_of_candidates
+                        budget -= cost_vector[candidate]
+                    else:
+                        budget_finished = True
+                        break
+            theta -= self.increment
+        return winners
+
 
 def initialize_rule(rule):
     if rule == 0:
@@ -275,6 +313,8 @@ def initialize_rule(rule):
         return CopelandRule()
     if rule == 3:
         return Knapsack()
+    if rule == 4:
+        return ThetaRule(0.05)
     else:
         raise Exception("Illegal rule number: " + str(rule))
 
