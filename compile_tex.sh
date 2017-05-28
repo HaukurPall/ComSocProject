@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-FILENAME=Proofs
+FILENAME=project
 rm -rf *.aux *.bbl *.blg *.log
 pdflatex ${FILENAME}.tex </dev/null
 bibtex ${FILENAME}.aux </dev/null

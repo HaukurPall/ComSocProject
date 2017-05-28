@@ -44,6 +44,8 @@ Again, consider any set of voters $V$ and a budget $B$. Also, let $F(V, B) = W$.
 Consider any set of voters $V$ and a budget $B$. Consider a ranking of options  based on their Borda scores. Now consider a profile $t*V$ for some $t \in \mathbb{N}$. Now notice that for any option $x$, Borda score of $x$ in $t*V$ amounts to $t$ times Borda score of $x$ in $V$. So the ranking remains unchanged, so the winning set is preserved. 
 \subsection{Budgeted Plurality rule}
 Proof is symmetric to the proof for Budgeted Borda rule. 
+\subsection{Copeland rule}
+As in case of the $\theta$-minimization rule, the structure of majority contests is not changed if the profile is multiplied. Thus, the winner of the Copeland rule will remain the same if such a change is performed.
 \section{Monotonicity}
 
 \subsection{Utility Maximization}
@@ -55,14 +57,22 @@ Then we claim that
 \item $c\in W'$
 \item $W\in F(R',B)$ if $a\notin W$
 \end{enumerate}
-Proof:
+\begin{proof}
+	
 
 \begin{enumerate}
 \item Note that either $c,a \in W$ (I) or $a\notin W$ (II). For (II) the desired result is immediate. For (I), note that from the way we defined $R'$ by a mere swap it follows that $u_{R'}(\{a,c\})=u_R(\{a,c\})$. Note in addition that if $a\in W'$ then a fortiori $c\in W'$ since $u_{R'}(b)=u_R(b)$ for all $b\in W\setminus \{a,b\}$. Hence suppose that $a,c\notin W'$. Then, since $W'$ is utility maximizing, there must be some set of alternatives $X\subseteq A\setminus W$ s.t. $C(X)\leq C(\{a,c\})$ and $u_{R'}(W\setminus)\{a,c\}\cup X)>u(W)$. Equivalently \[u_{R'}(W)-u_{R'}(\{a,c\})+u_{R'}(X)>u_{R'}(W)\] But $u_{R'}(W)=u_{R}(W)$ since $u_{R'}(\{a,c\})=u_R(\{a,c\})$ and $u_R'(w)=u_R(w)$ for all $w\in W\setminus \{a,c\}$. And $u_R'(X)=u_R(X)$ since nothing outside $W$ was changed. Hence \[u_V(W)-u_V(\{a,c\})+u_V(X)>u_R(W)\] But then $W$ is not utility maximising given $B$ - a contradiction.
 
 \item Suppose $b\notin W$. Since $W$ is utility maximizing given $B$, for any $d\notin W$ and any $S$ s.t. $d\in S$ and $C(S)\leq  B$, either $u_R(S)\leq u_R(W)$ (I) or $C_R(S)>C_R(W)$ (II). For (I), since $u_{R'}(S) \leq  u_{R}(S)+ u_{R'}(a)- u_{R}(a)= u_{R'}(W)$ by utility maximization of $W$ and since the same tie-breaking applies, $W\in F(R',B)$. For (II), since $C$ is unchanged, the desired result is immediate.
 
+\item (Budgeted Plurality)
+Note that if $c$ is put before $a$ it can only gain plurality points. Therefore, it will not be lowered in the plurality ranking. So, it will be elected in the new profile ($c \in W'$). Further, if $a \notin W$, no element of $W$ will lose plurality points, so they will all remain elected. So $W \in F(V,B)$.  
+\item (Budgeted Borda)
+Again, in the shifted profile $c$ will be able to receive more points and it cannot lose any. So it will remain elected $c \in W'$. Also, if $a \notin W$, no element of $W$ will lose any Borda points and no option outside of $W$ will be granted any points. So all options in $W$ will remain elected. So $W \in F(V',B)$.
+\item (Copeland Rule)
+Note that in the new profile $c$ will have a chance of winning one more majority contest and it for sure will not lose any more than in the original one. So it will remain elected ($c \in W'$). Also, if $a \notin W$, no element of $W$ will lose more contests than in the previous profile. Also, options outside of $W$ might only lose more majority contests in comparison with the original profile. So all members of $W$ will be elected in the new profile. So $W \in F(V',B)$
+
 \end{enumerate}
 
-
+\end{proof}
 \end{document}

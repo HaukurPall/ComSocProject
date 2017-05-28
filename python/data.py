@@ -1,6 +1,7 @@
 import model
 import random
 import math
+from collections import Counter as Counter
 
 
 def read_from_file(file_path):
@@ -22,8 +23,10 @@ def read_from_file(file_path):
         preference_list = []
         for line in file_list[index:]:
             preference_order = line.strip().split(",")
-            preference_order = [int(x) - 1 for x in preference_order]
-            preference_list.append(model.Preference(preference_order))
+            preference_order = [int(x) for x in preference_order]
+            preference_count = preference_order[0]
+            for count in range(preference_count):
+                preference_list.append(model.Preference([x - 1 for x in preference_order[1:]]))
         return model.Profile(number_of_voters, number_of_candidates, preference_list)
 
 
@@ -32,10 +35,15 @@ def write_to_file(file_name, profile):
         file.write(str(profile.number_of_candidates) + "\n")
         for candidate in range(profile.number_of_candidates):
             file.write(str(candidate + 1) + ",candidate" + "\n")
-        file.write(",".join([str(profile.number_of_voters), str(profile.number_of_voters), str(profile.unique_votes)]) + "\n")
 
+        counter = Counter()
         for preference in profile:
-            file.write(",".join([str(x + 1) for x in preference]) + "\n")
+            preference_name = ",".join([str(x + 1) for x in preference])
+            counter[preference_name] += 1
+        file.write(",".join([str(sum(counter.values())), str(sum(counter.values())), str(len(list(counter)))]) + "\n")
+
+        for preference_name, preference_count in counter.most_common():
+            file.write(",".join([str(preference_count), preference_name]) + "\n")
 
 
 def create_noisy_data(number_of_voters=10,

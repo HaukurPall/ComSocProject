@@ -5,6 +5,7 @@ import random
 import math
 import argparse
 import data
+import numpy as np
 
 
 class Preference:
@@ -94,11 +95,9 @@ class Profile:
             raise Exception("The reported number of voters does not equal the ballot")
         if self.number_of_candidates != preference_list[0].get_number_of_candidates():
             raise Exception("The reported number of candidates does not equal the ballot")
-        unique_preference_set = set()
-        for preference in preference_list:
-            if str(preference) not in unique_preference_set:
-                unique_preference_set.add(str(preference))
-        self.unique_votes = len(unique_preference_set)
+        self.borda_score = [x for x in range(self.number_of_candidates - 1, -1, -1)]
+        self.plurality_score = [0 for x in range(self.number_of_candidates)]
+        self.plurality_score[0] = 1
 
     def __str__(self):
         profile = ""
@@ -109,13 +108,23 @@ class Profile:
     def __getitem__(self, index):
         return self.preference_list[index]
 
-    def is_x_majority_winner_over_y(self, our_candidate, other_candidate, theta=0.5):
-        wins = 0
+    def compute_pairwise_wins(self):
+        P = [[0 for x in range(self.number_of_candidates)] for x in range(self.number_of_candidates)]
         for preference_order in self.preference_list:
-            if preference_order.is_x_more_preferred_than_y(our_candidate, other_candidate):
-                wins += 1
-        # strictly greater
-        return float(wins) / float(self.number_of_voters) > theta
+            for candidate in range(self.number_of_candidates):
+                for other_candidate in range(self.number_of_candidates):
+                    # majority contest against one self = win, for simplifying later computation
+                    if other_candidate == candidate:
+                        P[candidate][other_candidate] += 1
+                        continue
+                    if preference_order.is_x_more_preferred_than_y(candidate, other_candidate):
+                        P[candidate][other_candidate] += 1
+        P = [[wins / float(self.number_of_candidates) for wins in candidate] for candidate in P]
+        return P
+
+    def compute_utility_of_set(self, scoring_vector, winner_set):
+        candidate_scores = VotingRule.compute_scores_with_vector(scoring_vector, self)
+        return sum([candidate_scores[winner] for winner in winner_set])
 
 
 class VotingRule:
@@ -164,15 +173,21 @@ class VotingRule:
             moneyh_to_spend -= cost_vector[candidate]
         return winners
 
+    @staticmethod
+    def compute_scores_with_vector(score_vector, profile):
+        candidate_scores = [0] * len(score_vector)
+        for preference_order in profile:
+            for candidate_index, candidate in enumerate(preference_order):
+                candidate_scores[candidate] += score_vector[candidate_index]
+        return candidate_scores
+
 
 class PluralityRule(VotingRule):
     def __init__(self):
         super().__init__("Budget-Plurality rule", 0)
 
     def get_winners(self, profile, budget, cost_vector):
-        candidate_scores = [0] * profile.number_of_candidates
-        for preference in profile:
-            candidate_scores[preference.get_first_candidate()] += 1
+        candidate_scores = VotingRule.compute_scores_with_vector(profile.plurality_score, profile)
         return self.cut_score(budget, candidate_scores, cost_vector)
 
 
@@ -181,12 +196,7 @@ class BordaRule(VotingRule):
         super().__init__("Budget-Borda rule", 1)
 
     def get_winners(self, profile, budget, cost_vector):
-        candidate_scores = [0] * profile.number_of_candidates
-        for preference_order in profile:
-            score = profile.number_of_candidates - 1
-            for candidate in preference_order:
-                candidate_scores[candidate] += score
-                score -= 1
+        candidate_scores = VotingRule.compute_scores_with_vector(profile.borda_score, profile)
         return self.cut_score(budget, candidate_scores, cost_vector)
 
 
@@ -194,17 +204,22 @@ class CopelandRule(VotingRule):
     def __init__(self):
         super().__init__("Copeland Rule", 2)
 
-    def get_winners(self, profile, budget, cost_vector):
+    @staticmethod
+    def compute_copeland_score(profile):
+        pairwise_wins = profile.compute_pairwise_wins()
         candidate_scores = [0] * profile.number_of_candidates
         for candidate in range(0, profile.number_of_candidates):
             for other_candidate in range(0, profile.number_of_candidates):
                 if other_candidate == candidate:
                     continue
-                if profile.is_x_majority_winner_over_y(candidate, other_candidate):
+                if pairwise_wins[candidate, other_candidate] > 0.5:
                     candidate_scores[candidate] += 1
                 else:
                     candidate_scores[candidate] -= 1
+        return candidate_scores
 
+    def get_winners(self, profile, budget, cost_vector):
+        candidate_scores = CopelandRule.compute_copeland_score(profile)
         return self.cut_score(budget, candidate_scores, cost_vector)
 
 
@@ -213,14 +228,8 @@ class Knapsack(VotingRule):
         super().__init__("Knapsack Optimization", 3)
 
     def get_winners(self, profile, budget, cost_vector):
-        candidate_scores = [0] * profile.number_of_candidates
-        for preference_order in profile:
-            # instead of using borda scores we use borda score + 1.
-            # This solves a problem when we are finding the knapsack items.
-            score = profile.number_of_candidates
-            for candidate in preference_order:
-                candidate_scores[candidate] += score
-                score -= 1
+        # we use borda score + 1 to avoid computational errors later on
+        candidate_scores = VotingRule.compute_scores_with_vector([x + 1 for x in profile.borda_score], profile)
         ordered_candidate_cost = [(x, cost_vector[x], candidate_scores[x]) for x in range(len(cost_vector))]
         # we order the candidates after cost
         ordered_candidate_cost.sort(key=lambda tup: tup[1])
@@ -266,6 +275,175 @@ def solve_knapsack(W, weights, values):
     return K
 
 
+class ThetaRule(VotingRule):
+    def __init__(self, increment=0.05):
+        super().__init__("Theta rule", 4)
+        self.increment = increment
+        self.final_theta = -1.0
+
+    def get_winners(self, profile, budget, cost_vector):
+        pairwise_wins = profile.compute_pairwise_wins()
+        winners = []
+        theta = 1.0
+        budget_finished = False
+        while len(winners) != profile.number_of_candidates and not budget_finished:
+            for candidate, candidate_wins_prob in enumerate(pairwise_wins):
+                if min(candidate_wins_prob) >= theta:
+                    if budget - cost_vector[candidate] >= 0:
+                        winners.append(candidate)
+                        # we mark the candidate as terrible after it has been picked
+                        pairwise_wins[candidate] = [-1] * profile.number_of_candidates
+                        budget -= cost_vector[candidate]
+                    else:
+                        budget_finished = True
+                        self.final_theta = theta
+                        break
+            theta -= self.increment
+        return winners
+
+
+class Axiom:
+    def __init__(self, name, number):
+        self.name = name
+        self.number = number
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        pass
+
+    def has_value(self):
+        pass
+
+    def get_value(self):
+        pass
+
+
+class Unanimity(Axiom):
+    def __init__(self):
+        super().__init__("Unanimity", 0)
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        winners = rule.get_winners(profile, budget, cost)
+        winners.sort()
+        unanimous_winners = []
+        # we assume the profile has unanimous winners
+        for candidate in profile[0]:
+            if budget - cost[candidate] >= 0:
+                unanimous_winners.append(candidate)
+                budget -= cost[candidate]
+            # if adding the next candidate would go over the budget we stop.
+            else:
+                break
+        unanimous_winners.sort()
+        return winners == unanimous_winners
+
+    def has_value(self):
+        return False
+
+    def get_value(self):
+        pass
+
+
+class CommitteeMonotonicity(Axiom):
+    def __init__(self, max_budget, increment):
+        super().__init__("Committee Monotonicity", 1)
+        self.max_budget = max_budget
+        self.increment = increment
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        first_winners = rule.get_winners(profile, budget, cost)
+        while budget <= self.max_budget:
+            budget += self.increment
+            winners = rule.get_winners(profile, budget, cost)
+            for winner in first_winners:
+                if winner not in winners:
+                    return False
+        return True
+
+    def has_value(self):
+        return False
+
+    def get_value(self):
+        pass
+
+
+class ThetaMinority(Axiom):
+    def __init__(self):
+        super().__init__("Theta Minority", 2)
+        self.value = False
+        self.is_present = False
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        winners = rule.get_winners(profile, budget, cost)
+        winners.sort()
+        theta_rule = ThetaRule()
+        theta_ority_winners = theta_rule.get_winners(profile, budget, cost)
+        theta_ority_winners.sort()
+        if winners == theta_ority_winners:
+            self.value = theta_rule.final_theta
+            self.is_present = True
+            return True
+        else:
+            return False
+
+    def has_value(self):
+        return self.is_present
+
+    def get_value(self):
+        return self.value
+
+
+class Regret(Axiom):
+    def __init__(self):
+        super().__init__("Regret Evaluation", 3)
+        # should always be between 1 or 0
+        self.value = -1.0
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        winners = rule.get_winners(profile, budget, cost)
+        knapsack_rule = Knapsack()
+        # find optimal utility with knapsack rule
+        knapsack_winners = knapsack_rule.get_winners(profile, budget, cost)
+        knapsack_utility = profile.compute_utility_of_set(profile.borda_score, knapsack_winners)
+        # compute total utility of winners based on borda score
+        winners_utility = profile.compute_utility_of_set(profile.borda_score, winners)
+        self.value = winners_utility/float(knapsack_utility)
+        return True
+
+    def has_value(self):
+        return True
+
+    def get_value(self):
+        return self.value
+
+
+class CopelandAxiom(Axiom):
+    def __init__(self):
+        super().__init__("Copeland Axiom", 4)
+        # should always be between 1 or 0
+        self.value = 2.0
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        winners = rule.get_winners(profile, budget, cost)
+        pairwise_wins = profile.compute_pairwise_wins()
+        for winner in winners:
+            wins = 0
+            for competitor in pairwise_wins[winner]:
+                if winner == competitor:
+                    continue
+                # strictly greater
+                if pairwise_wins[winner][competitor] > 0.5:
+                    wins += 1
+            if self.value > wins/float(profile.number_of_candidates - 1):
+                self.value = wins/float(profile.number_of_candidates - 1)
+        return True
+
+    def has_value(self):
+        return True
+
+    def get_value(self):
+        return self.value
+
+
 def initialize_rule(rule):
     if rule == 0:
         return PluralityRule()
@@ -275,14 +453,38 @@ def initialize_rule(rule):
         return CopelandRule()
     if rule == 3:
         return Knapsack()
+    if rule == 4:
+        return ThetaRule()
     else:
         raise Exception("Illegal rule number: " + str(rule))
+
+
+def initialize_axiom(axiom, axiom_parameter_1=200, axiom_parameter_2=1):
+    if axiom == 0:
+        return Unanimity()
+    if axiom == 1:
+        return CommitteeMonotonicity(axiom_parameter_1, axiom_parameter_2)
+    if axiom == 2:
+        return ThetaMinority()
+    if axiom == 3:
+        return Regret()
+    if axiom == 4:
+        return CopelandAxiom()
+    else:
+        raise Exception("Illegal axiom number: " + str(axiom))
 
 
 def create_cost_distribution(number_of_candidates, cost_distribution, distribution_parameter):
     # uniform
     if cost_distribution == 0:
         return [distribution_parameter] * number_of_candidates
+    # turnicated normal distribution
+    if cost_distribution == 1:
+        std = float(distribution_parameter)
+        mean = 100
+        size = number_of_candidates
+        X = np.random.normal(mean, std, size)
+        return X.round().astype(int)
     else:
         raise Exception("Illegal cost distribution: " + str(cost_distribution))
 
@@ -294,13 +496,16 @@ def main():
     parser.add_argument('preferences', help='A filepath either containing preferences or it does not exist\n'
                                             'If the param "write" is used then the generated preferences will be outputted there.')
     parser.add_argument('--write', action='store_true', help="Set if the generated profile should be saved to a file")
-    parser.add_argument('-c', '--cost', type=int, default=0, help='The cost distribution to use over candidates\n'
-                                                                  '0 = uniform cost of 1 for item')
+    parser.add_argument('-c', '--cost', type=int, default=1, help='The cost distribution to use over candidates\n'
+                                                                  '0 = uniform cost of 1 for item\n'
+                                                                  '1 = Normal distribution with mean=100, and std=15')
     parser.add_argument('-r', '--rule', type=int, default=0, help='The rule to decide the winner\n'
                                                                   '0 = budget-plurality\n'
                                                                   '1 = budget-borda\n'
                                                                   '2 = copeland\n'
                                                                   '3 = knapsack\n')
+    parser.add_argument('--axiom', type=int, default=0, help='The axiom the check the rule against\n'
+                                                             '0 = Unanimity\n')
     parser.add_argument('-b', '--budget', type=int, default=10, help='The total budget to be used')
     parser.add_argument('--voters', type=int, default=10, help='The number of voters')
     parser.add_argument('--candidates', type=int, default=10, help='The number of candidates')
@@ -315,13 +520,22 @@ def main():
     if not args.write:
         profile = data.read_from_file(args.preferences)
         rule = initialize_rule(args.rule)
-        cost_vector = create_cost_distribution(profile.number_of_candidates, args.cost, 1)
+        cost_vector = create_cost_distribution(profile.number_of_candidates, args.cost, 15)
         winner_set = rule.get_winners(profile, args.budget, cost_vector)
-        total_cost = 0
-        for winner in winner_set:
-            print(str(winner) + " " + str(cost_vector[winner]))
-            total_cost += cost_vector[winner]
-        print(" ".join([str(total_cost), str(args.budget)]))
+        axiom = initialize_axiom(args.axiom)
+        satisfied = axiom.is_satisfied(rule, profile, args.budget, cost_vector)
+        if satisfied:
+            print(rule.name + " satisfies " + axiom.name)
+            if axiom.has_value():
+                print("value: " + str(axiom.get_value()))
+        else:
+            print(rule.name + " does not satisfy " + axiom.name)
+        #        total_cost = 0
+        #        for winner in winner_set:
+        #            print(str(winner) + " " + str(cost_vector[winner]))
+        #           total_cost += cost_vector[winner]
+        #        print(" ".join([str(total_cost), str(args.budget)]))
+
     else:
         profile = data.create_noisy_data(args.voters, args.candidates, args.base, args.swaps, args.noise)
         data.write_to_file(args.preferences, profile)
