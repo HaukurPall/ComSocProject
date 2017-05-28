@@ -108,14 +108,6 @@ class Profile:
     def __getitem__(self, index):
         return self.preference_list[index]
 
-    def is_x_majority_winner_over_y(self, our_candidate, other_candidate, theta=0.5):
-        wins = 0
-        for preference_order in self.preference_list:
-            if preference_order.is_x_more_preferred_than_y(our_candidate, other_candidate):
-                wins += 1
-        # strictly greater
-        return float(wins) / float(self.number_of_voters) > theta
-
     def compute_pairwise_wins(self):
         P = [[0 for x in range(self.number_of_candidates)] for x in range(self.number_of_candidates)]
         for preference_order in self.preference_list:
@@ -212,17 +204,22 @@ class CopelandRule(VotingRule):
     def __init__(self):
         super().__init__("Copeland Rule", 2)
 
-    def get_winners(self, profile, budget, cost_vector):
+    @staticmethod
+    def compute_copeland_score(profile):
+        pairwise_wins = profile.compute_pairwise_wins()
         candidate_scores = [0] * profile.number_of_candidates
         for candidate in range(0, profile.number_of_candidates):
             for other_candidate in range(0, profile.number_of_candidates):
                 if other_candidate == candidate:
                     continue
-                if profile.is_x_majority_winner_over_y(candidate, other_candidate):
+                if pairwise_wins[candidate, other_candidate] > 0.5:
                     candidate_scores[candidate] += 1
                 else:
                     candidate_scores[candidate] -= 1
+        return candidate_scores
 
+    def get_winners(self, profile, budget, cost_vector):
+        candidate_scores = CopelandRule.compute_copeland_score(profile)
         return self.cut_score(budget, candidate_scores, cost_vector)
 
 
@@ -290,8 +287,8 @@ class ThetaRule(VotingRule):
         theta = 1.0
         budget_finished = False
         while len(winners) != profile.number_of_candidates and not budget_finished:
-            for candidate, candidate_wins in enumerate(pairwise_wins):
-                if min(candidate_wins) >= theta:
+            for candidate, candidate_wins_prob in enumerate(pairwise_wins):
+                if min(candidate_wins_prob) >= theta:
                     if budget - cost_vector[candidate] >= 0:
                         winners.append(candidate)
                         # we mark the candidate as terrible after it has been picked
@@ -419,6 +416,34 @@ class Regret(Axiom):
         return self.value
 
 
+class CopelandAxiom(Axiom):
+    def __init__(self):
+        super().__init__("Copeland Axiom", 4)
+        # should always be between 1 or 0
+        self.value = 2.0
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        winners = rule.get_winners(profile, budget, cost)
+        pairwise_wins = profile.compute_pairwise_wins()
+        for winner in winners:
+            wins = 0
+            for competitor in pairwise_wins[winner]:
+                if winner == competitor:
+                    continue
+                # strictly greater
+                if pairwise_wins[winner][competitor] > 0.5:
+                    wins += 1
+            if self.value > wins/float(profile.number_of_candidates - 1):
+                self.value = wins/float(profile.number_of_candidates - 1)
+        return True
+
+    def has_value(self):
+        return True
+
+    def get_value(self):
+        return self.value
+
+
 def initialize_rule(rule):
     if rule == 0:
         return PluralityRule()
@@ -443,6 +468,8 @@ def initialize_axiom(axiom, axiom_parameter_1=200, axiom_parameter_2=1):
         return ThetaMinority()
     if axiom == 3:
         return Regret()
+    if axiom == 4:
+        return CopelandAxiom()
     else:
         raise Exception("Illegal axiom number: " + str(axiom))
 
