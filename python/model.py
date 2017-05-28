@@ -95,6 +95,9 @@ class Profile:
             raise Exception("The reported number of voters does not equal the ballot")
         if self.number_of_candidates != preference_list[0].get_number_of_candidates():
             raise Exception("The reported number of candidates does not equal the ballot")
+        self.borda_score = [x for x in range(self.number_of_candidates - 1, -1, -1)]
+        self.plurality_score = [0 for x in range(self.number_of_candidates)]
+        self.plurality_score[0] = 1
 
     def __str__(self):
         profile = ""
@@ -126,6 +129,10 @@ class Profile:
                         P[candidate][other_candidate] += 1
         P = [[wins / float(self.number_of_candidates) for wins in candidate] for candidate in P]
         return P
+
+    def compute_utility_of_set(self, scoring_vector, winner_set):
+        candidate_scores = VotingRule.compute_scores_with_vector(scoring_vector, self)
+        return sum([candidate_scores[winner] for winner in winner_set])
 
 
 class VotingRule:
@@ -174,15 +181,21 @@ class VotingRule:
             moneyh_to_spend -= cost_vector[candidate]
         return winners
 
+    @staticmethod
+    def compute_scores_with_vector(score_vector, profile):
+        candidate_scores = [0] * len(score_vector)
+        for preference_order in profile:
+            for candidate_index, candidate in enumerate(preference_order):
+                candidate_scores[candidate] += score_vector[candidate_index]
+        return candidate_scores
+
 
 class PluralityRule(VotingRule):
     def __init__(self):
         super().__init__("Budget-Plurality rule", 0)
 
     def get_winners(self, profile, budget, cost_vector):
-        candidate_scores = [0] * profile.number_of_candidates
-        for preference in profile:
-            candidate_scores[preference.get_first_candidate()] += 1
+        candidate_scores = VotingRule.compute_scores_with_vector(profile.plurality_score, profile)
         return self.cut_score(budget, candidate_scores, cost_vector)
 
 
@@ -191,12 +204,7 @@ class BordaRule(VotingRule):
         super().__init__("Budget-Borda rule", 1)
 
     def get_winners(self, profile, budget, cost_vector):
-        candidate_scores = [0] * profile.number_of_candidates
-        for preference_order in profile:
-            score = profile.number_of_candidates - 1
-            for candidate in preference_order:
-                candidate_scores[candidate] += score
-                score -= 1
+        candidate_scores = VotingRule.compute_scores_with_vector(profile.borda_score, profile)
         return self.cut_score(budget, candidate_scores, cost_vector)
 
 
@@ -223,14 +231,8 @@ class Knapsack(VotingRule):
         super().__init__("Knapsack Optimization", 3)
 
     def get_winners(self, profile, budget, cost_vector):
-        candidate_scores = [0] * profile.number_of_candidates
-        for preference_order in profile:
-            # instead of using borda scores we use borda score + 1.
-            # This solves a problem when we are finding the knapsack items.
-            score = profile.number_of_candidates
-            for candidate in preference_order:
-                candidate_scores[candidate] += score
-                score -= 1
+        # we use borda score + 1 to avoid computational errors later on
+        candidate_scores = VotingRule.compute_scores_with_vector([x + 1 for x in profile.borda_score], profile)
         ordered_candidate_cost = [(x, cost_vector[x], candidate_scores[x]) for x in range(len(cost_vector))]
         # we order the candidates after cost
         ordered_candidate_cost.sort(key=lambda tup: tup[1])
@@ -311,6 +313,12 @@ class Axiom:
     def is_satisfied(self, rule, profile, budget, cost):
         pass
 
+    def has_value(self):
+        pass
+
+    def get_value(self):
+        pass
+
 
 class Unanimity(Axiom):
     def __init__(self):
@@ -331,6 +339,12 @@ class Unanimity(Axiom):
         unanimous_winners.sort()
         return winners == unanimous_winners
 
+    def has_value(self):
+        return False
+
+    def get_value(self):
+        pass
+
 
 class CommitteeMonotonicity(Axiom):
     def __init__(self, max_budget, increment):
@@ -348,10 +362,18 @@ class CommitteeMonotonicity(Axiom):
                     return False
         return True
 
+    def has_value(self):
+        return False
+
+    def get_value(self):
+        pass
+
 
 class ThetaMinority(Axiom):
     def __init__(self):
         super().__init__("Theta Minority", 2)
+        self.value = False
+        self.is_present = False
 
     def is_satisfied(self, rule, profile, budget, cost):
         winners = rule.get_winners(profile, budget, cost)
@@ -360,9 +382,41 @@ class ThetaMinority(Axiom):
         theta_ority_winners = theta_rule.get_winners(profile, budget, cost)
         theta_ority_winners.sort()
         if winners == theta_ority_winners:
-            return True, theta_rule.final_theta
+            self.value = theta_rule.final_theta
+            self.is_present = True
+            return True
         else:
             return False
+
+    def has_value(self):
+        return self.is_present
+
+    def get_value(self):
+        return self.value
+
+
+class Regret(Axiom):
+    def __init__(self):
+        super().__init__("Regret Evaluation", 3)
+        # should always be between 1 or 0
+        self.value = -1.0
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        winners = rule.get_winners(profile, budget, cost)
+        knapsack_rule = Knapsack()
+        # find optimal utility with knapsack rule
+        knapsack_winners = knapsack_rule.get_winners(profile, budget, cost)
+        knapsack_utility = profile.compute_utility_of_set(profile.borda_score, knapsack_winners)
+        # compute total utility of winners based on borda score
+        winners_utility = profile.compute_utility_of_set(profile.borda_score, winners)
+        self.value = winners_utility/float(knapsack_utility)
+        return True
+
+    def has_value(self):
+        return True
+
+    def get_value(self):
+        return self.value
 
 
 def initialize_rule(rule):
@@ -387,6 +441,8 @@ def initialize_axiom(axiom, axiom_parameter_1=200, axiom_parameter_2=1):
         return CommitteeMonotonicity(axiom_parameter_1, axiom_parameter_2)
     if axiom == 2:
         return ThetaMinority()
+    if axiom == 3:
+        return Regret()
     else:
         raise Exception("Illegal axiom number: " + str(axiom))
 
@@ -443,6 +499,8 @@ def main():
         satisfied = axiom.is_satisfied(rule, profile, args.budget, cost_vector)
         if satisfied:
             print(rule.name + " satisfies " + axiom.name)
+            if axiom.has_value():
+                print("value: " + str(axiom.get_value()))
         else:
             print(rule.name + " does not satisfy " + axiom.name)
         #        total_cost = 0
