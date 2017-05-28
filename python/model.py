@@ -7,6 +7,7 @@ import argparse
 import data
 import numpy as np
 
+
 class Preference:
     """
     :param list_of_preferences: orderer list of integers, in which integer is a unique candidate, first candidate is 0
@@ -123,7 +124,7 @@ class Profile:
                         continue
                     if preference_order.is_x_more_preferred_than_y(candidate, other_candidate):
                         P[candidate][other_candidate] += 1
-        P = [[wins/float(self.number_of_candidates) for wins in candidate] for candidate in P]
+        P = [[wins / float(self.number_of_candidates) for wins in candidate] for candidate in P]
         return P
 
 
@@ -274,10 +275,12 @@ def solve_knapsack(W, weights, values):
 
     return K
 
+
 class ThetaRule(VotingRule):
-    def __init__(self, increment):
+    def __init__(self, increment=0.05):
         super().__init__("Theta rule", 4)
         self.increment = increment
+        self.final_theta = -1.0
 
     def get_winners(self, profile, budget, cost_vector):
         pairwise_wins = profile.compute_pairwise_wins()
@@ -294,13 +297,13 @@ class ThetaRule(VotingRule):
                         budget -= cost_vector[candidate]
                     else:
                         budget_finished = True
+                        self.final_theta = theta
                         break
             theta -= self.increment
         return winners
 
 
 class Axiom:
-
     def __init__(self, name, number):
         self.name = name
         self.number = number
@@ -310,7 +313,6 @@ class Axiom:
 
 
 class Unanimity(Axiom):
-
     def __init__(self):
         super().__init__("Unanimity", 0)
 
@@ -331,7 +333,6 @@ class Unanimity(Axiom):
 
 
 class CommitteeMonotonicity(Axiom):
-
     def __init__(self, max_budget, increment):
         super().__init__("Committee Monotonicity", 1)
         self.max_budget = max_budget
@@ -348,6 +349,22 @@ class CommitteeMonotonicity(Axiom):
         return True
 
 
+class ThetaMinority(Axiom):
+    def __init__(self):
+        super().__init__("Theta Minority", 2)
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        winners = rule.get_winners(profile, budget, cost)
+        winners.sort()
+        theta_rule = ThetaRule()
+        theta_ority_winners = theta_rule.get_winners(profile, budget, cost)
+        theta_ority_winners.sort()
+        if winners == theta_ority_winners:
+            return True, theta_rule.final_theta
+        else:
+            return False
+
+
 def initialize_rule(rule):
     if rule == 0:
         return PluralityRule()
@@ -358,7 +375,7 @@ def initialize_rule(rule):
     if rule == 3:
         return Knapsack()
     if rule == 4:
-        return ThetaRule(0.05)
+        return ThetaRule()
     else:
         raise Exception("Illegal rule number: " + str(rule))
 
@@ -368,6 +385,8 @@ def initialize_axiom(axiom, axiom_parameter_1=200, axiom_parameter_2=1):
         return Unanimity()
     if axiom == 1:
         return CommitteeMonotonicity(axiom_parameter_1, axiom_parameter_2)
+    if axiom == 2:
+        return ThetaMinority()
     else:
         raise Exception("Illegal axiom number: " + str(axiom))
 
@@ -403,7 +422,7 @@ def main():
                                                                   '2 = copeland\n'
                                                                   '3 = knapsack\n')
     parser.add_argument('--axiom', type=int, default=0, help='The axiom the check the rule against\n'
-                                                                  '0 = Unanimity\n')
+                                                             '0 = Unanimity\n')
     parser.add_argument('-b', '--budget', type=int, default=10, help='The total budget to be used')
     parser.add_argument('--voters', type=int, default=10, help='The number of voters')
     parser.add_argument('--candidates', type=int, default=10, help='The number of candidates')
@@ -426,11 +445,11 @@ def main():
             print(rule.name + " satisfies " + axiom.name)
         else:
             print(rule.name + " does not satisfy " + axiom.name)
-#        total_cost = 0
-#        for winner in winner_set:
-#            print(str(winner) + " " + str(cost_vector[winner]))
-#           total_cost += cost_vector[winner]
-#        print(" ".join([str(total_cost), str(args.budget)]))
+        #        total_cost = 0
+        #        for winner in winner_set:
+        #            print(str(winner) + " " + str(cost_vector[winner]))
+        #           total_cost += cost_vector[winner]
+        #        print(" ".join([str(total_cost), str(args.budget)]))
 
     else:
         profile = data.create_noisy_data(args.voters, args.candidates, args.base, args.swaps, args.noise)
