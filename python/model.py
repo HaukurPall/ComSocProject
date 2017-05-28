@@ -94,11 +94,6 @@ class Profile:
             raise Exception("The reported number of voters does not equal the ballot")
         if self.number_of_candidates != preference_list[0].get_number_of_candidates():
             raise Exception("The reported number of candidates does not equal the ballot")
-        unique_preference_set = set()
-        for preference in preference_list:
-            if str(preference) not in unique_preference_set:
-                unique_preference_set.add(str(preference))
-        self.unique_votes = len(unique_preference_set)
 
     def __str__(self):
         profile = ""

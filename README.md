@@ -24,9 +24,9 @@ The format of the file is like in the preflib.org
     ...
     Candidate_M=M,candidate_name_M
     N,B,U=Voters,Ballots,Unique ballots
-    Ballot_1=1,2,...,M
+    Ballot_1=C_1,1,2,...,M
     ...
-    Ballot_B=1,2,...,M
+    Ballot_B=C_B1,2,...,M
     
 To generate ballots and save to file 'random_profile.txt'
 
