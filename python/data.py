@@ -59,6 +59,8 @@ def create_noisy_data(number_of_voters=10,
         preference_order = model.Preference.generate_random_preference_order(number_of_candidates)
         for voter in range(int(last), int(last + avg)):
             list_of_preferences.append(preference_order.get_copy())
+            if voter == number_of_voters - 1:
+                break
         last += avg
 
     # apply noise to the whole profile

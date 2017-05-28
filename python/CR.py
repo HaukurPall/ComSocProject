@@ -1,7 +1,7 @@
 import model
 import data
 import argparse
-import numpy as np
+import os
 
 def initialize_rule(rule):
     if rule == 0:
@@ -46,12 +46,14 @@ def main():
     from argparse import RawTextHelpFormatter
     parser = argparse.ArgumentParser(description='Computes the winner of given profile',
                                      formatter_class=RawTextHelpFormatter)
-    parser.add_argument('preferences', help='A filepath either containing preferences or it does not exist\n'
+    parser.add_argument('--preferences', help='A filepath either containing preferences or it does not exist\n'
                                             'If the param "write" is used then the generated preferences will be outputted there.')
     parser.add_argument('--write', action='store_true', help="Set if the generated profile should be saved to a file")
-    parser.add_argument('-c', '--cost', type=int, default=1, help='The cost distribution to use over candidates\n'
+    parser.add_argument('--generate', action='store_true', help="Run generate-profiles code block")
+    parser.add_argument('--read', action='store_true', help="Run read-profiles code block")
+    parser.add_argument('--cost', type=int, default=1, help='The cost distribution to use over candidates\n'
                                                                   '0 = Normal distribution with mean=100, and std=15\n')
-    parser.add_argument('-r', '--rule', type=int, default=0, help='The rule to decide the winner\n'
+    parser.add_argument('--rule', type=int, default=0, help='The rule to decide the winner\n'
                                                                   '0 = budget-plurality\n'
                                                                   '1 = budget-borda\n'
                                                                   '2 = copeland\n'
@@ -64,7 +66,7 @@ def main():
                                                              '3 = Regret\n'
                                                              '4 = Copeland Axiom\n'
                                                              '5 = Gini Coefficient\n')
-    parser.add_argument('-b', '--budget', type=int, default=10, help='The total budget to be used')
+    parser.add_argument('--budget', type=int, default=10, help='The total budget to be used')
     parser.add_argument('--voters', type=int, default=10, help='The number of voters')
     parser.add_argument('--candidates', type=int, default=10, help='The number of candidates')
     parser.add_argument('--base', type=int, default=3, help='The number base preference orders')
@@ -74,6 +76,14 @@ def main():
     # group.add_argument('-v', '--verbose', action='store_true')
     # group.add_argument('-q', '--quiet', action='store_true')
     args = parser.parse_args()
+
+    if args.generate:
+        run_generation()
+        return
+
+    if args.read:
+        read_data_set()
+        return
 
     if not args.write:
         profile = data.read_from_file(args.preferences)
@@ -98,6 +108,53 @@ def main():
         profile = data.create_noisy_data(args.voters, args.candidates, args.base, args.swaps, args.noise)
         data.write_to_file(args.preferences, profile)
 
+
+def run_generation():
+    for i in range(50):
+        voters = 100
+        candidates = 10
+        bases = 10
+        swaps = 5
+        profile = data.create_noisy_data(voters, candidates, bases, swaps, 2)
+        data.write_to_file(os.path.join("data_set", "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, bases, swaps) + ".txt"), profile)
+
+
+def read_data_set():
+    from os import listdir
+    from os.path import isfile, join
+    mypath = "data_set"
+    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+
+    budget = 1000
+
+    rules = [model.PluralityRule(), model.BordaRule(), model.CopelandRule(), model.Knapsack(), model.ThetaRule()]
+    axioms_but_unanimity = [model.CommitteeMonotonicity(250, 1), model.ThetaMinority(), model.Regret(), model.CopelandAxiom(), model.GiniCoefficient()]
+    profile_number = 0
+    outcome = []
+    for file in onlyfiles:
+        if "v100:" not in file:
+            continue
+        profile_number += 1
+        profile = data.read_from_file(join(mypath, file))
+        cost_vector = create_cost_distribution(profile.number_of_candidates, 0)
+        for rule in rules:
+            winners = rule.get_winners(profile, budget, cost_vector)
+            for axiom in axioms_but_unanimity:
+                satisfied = axiom.is_satisfied(rule, winners, profile, budget, cost_vector)
+                if satisfied:
+                    if axiom.has_value():
+                        outcome.append((rule.number, axiom.number, profile_number, axiom.get_value()))
+                    else:
+                        outcome.append((rule.number, axiom.number, profile_number, 1))
+                else:
+                    outcome.append((rule.number, axiom.number, profile_number, 0))
+    write_conlusions_to_file(outcome, "greg_test.csv")
+
+
+def write_conlusions_to_file(outcome, filename):
+    with open(filename, "w") as file:
+        for line in outcome:
+            file.write(",".join([str(line[0]), str(line[1]), str(line[2]), str(line[3])]) + "\n")
 
 if __name__ == "__main__":
     main()

@@ -89,9 +89,9 @@ class Profile:
         self.number_of_candidates = number_of_candidates
         self.preference_list = preference_list
         if self.number_of_voters != len(preference_list):
-            raise Exception("The reported number of voters does not equal the ballot")
+            raise Exception("The reported number of voters {} does not equal the ballot {}".format(self.number_of_voters, len(preference_list)))
         if self.number_of_candidates != preference_list[0].get_number_of_candidates():
-            raise Exception("The reported number of candidates does not equal the ballot")
+            raise Exception("The reported number of candidates "+ str(self.number_of_candidates) + " does not equal the ballot" + str(preference_list[0].get_number_of_candidates()))
         self.borda_score = [x for x in range(self.number_of_candidates - 1, -1, -1)]
         self.plurality_score = [0 for x in range(self.number_of_candidates)]
         self.plurality_score[0] = 1
@@ -304,7 +304,7 @@ class Axiom:
         self.name = name
         self.number = number
 
-    def is_satisfied(self, rule, profile, budget, cost):
+    def is_satisfied(self, rule, winners, profile, budget, cost):
         pass
 
     def has_value(self):
@@ -318,8 +318,7 @@ class Unanimity(Axiom):
     def __init__(self):
         super().__init__("Unanimity", 0)
 
-    def is_satisfied(self, rule, profile, budget, cost):
-        winners = rule.get_winners(profile, budget, cost)
+    def is_satisfied(self, rule, winners, profile, budget, cost):
         winners.sort()
         unanimous_winners = []
         # we assume the profile has unanimous winners
@@ -346,13 +345,12 @@ class CommitteeMonotonicity(Axiom):
         self.max_budget = max_budget
         self.increment = increment
 
-    def is_satisfied(self, rule, profile, budget, cost):
-        first_winners = rule.get_winners(profile, budget, cost)
+    def is_satisfied(self, rule, winners, profile, budget, cost):
         while budget <= self.max_budget:
             budget += self.increment
-            winners = rule.get_winners(profile, budget, cost)
-            for winner in first_winners:
-                if winner not in winners:
+            new_winners = rule.get_winners(profile, budget, cost)
+            for winner in winners:
+                if winner not in new_winners:
                     return False
         return True
 
@@ -369,8 +367,7 @@ class ThetaMinority(Axiom):
         self.value = False
         self.is_present = False
 
-    def is_satisfied(self, rule, profile, budget, cost):
-        winners = rule.get_winners(profile, budget, cost)
+    def is_satisfied(self, rule, winners, profile, budget, cost):
         winners.sort()
         theta_rule = ThetaRule()
         theta_ority_winners = theta_rule.get_winners(profile, budget, cost)
@@ -395,8 +392,7 @@ class Regret(Axiom):
         # should always be between 1 or 0
         self.value = -1.0
 
-    def is_satisfied(self, rule, profile, budget, cost):
-        winners = rule.get_winners(profile, budget, cost)
+    def is_satisfied(self, rule, winners, profile, budget, cost):
         knapsack_rule = Knapsack()
         # find optimal utility with knapsack rule
         knapsack_winners = knapsack_rule.get_winners(profile, budget, cost)
@@ -419,12 +415,11 @@ class CopelandAxiom(Axiom):
         # should always be between 1 or 0
         self.value = 2.0
 
-    def is_satisfied(self, rule, profile, budget, cost):
-        winners = rule.get_winners(profile, budget, cost)
+    def is_satisfied(self, rule, winners, profile, budget, cost):
         pairwise_wins = profile.compute_pairwise_wins()
         for winner in winners:
             wins = 0
-            for competitor in pairwise_wins[winner]:
+            for competitor in range(profile.number_of_candidates):
                 if winner == competitor:
                     continue
                 # strictly greater
@@ -447,19 +442,17 @@ class GiniCoefficient(Axiom):
         # should always be between 1 or 0
         self.value = 2.0
 
-    def is_satisfied(self, rule, profile, budget, cost):
-        winners = rule.get_winners(profile, budget, cost)
-
-        voter_scores = [0] * profile.number_of_candidates() #initialize a list of individual voters' regret count
+    def is_satisfied(self, rule, winners, profile, budget, cost):
+        voter_scores = [0] * profile.number_of_candidates #initialize a list of individual voters' regret count
         for preference_order in profile:		#look at one voter in profile
             score = profile.number_of_candidates - 1	#this is the utility score for the top-ranked item of this voter
             for candidate in preference_order:		#go through all candidates in voter's preference_order
                 if candidate in winners:		#only add utility if candidate is not in winner set
-                    voter_scores[preference_order] += score
+                    voter_scores[candidate] += score
                 else:
                     continue
                 score -= 1
-        total_score = 0
+        total_score = 0.0
         for score1 in voter_scores:
             total_score += score1
 
