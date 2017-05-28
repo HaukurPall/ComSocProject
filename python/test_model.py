@@ -68,5 +68,11 @@ class Tests(unittest.TestCase):
         data.write_to_file(file_name, profile)
         os.remove(file_name)
 
+    def test_normal_distribution(self):
+        cost = model.create_cost_distribution(profile.number_of_candidates, 1, 15)
+        print(cost)
+        self.assertTrue(max(cost) <= 150)
+        self.assertTrue(min(cost) >= 50)
+
 if __name__ == "__main__":
     unittest.main()

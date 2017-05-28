@@ -5,11 +5,14 @@ Silvan Hungerbühler, Max Rapp, Grzegorz Lioswski, Haukur Páll Jónsson
 ## The Python model
 Code is in code/model.py and is run using the command line
 
-    python3 model.py --cost 0 --rule 0 --budget 100 test_preferences.txt
+    python3 model.py --cost 1 --rule 0 --budget 100 test_preferences.txt
 
 For help see
 
     python3 model.py -h
+
+### Prerequisites
+Python3.5, Numpy
 
 ### Input
 To run the program against some ballots just add the filename where the ballot is stored as a command line argument.

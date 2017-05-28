@@ -5,7 +5,7 @@ import random
 import math
 import argparse
 import data
-
+import numpy as np
 
 class Preference:
     """
@@ -381,6 +381,13 @@ def create_cost_distribution(number_of_candidates, cost_distribution, distributi
     # uniform
     if cost_distribution == 0:
         return [distribution_parameter] * number_of_candidates
+    # turnicated normal distribution
+    if cost_distribution == 1:
+        std = float(distribution_parameter)
+        mean = 100
+        size = number_of_candidates
+        X = np.random.normal(mean, std, size)
+        return X.round().astype(int)
     else:
         raise Exception("Illegal cost distribution: " + str(cost_distribution))
 
@@ -392,8 +399,9 @@ def main():
     parser.add_argument('preferences', help='A filepath either containing preferences or it does not exist\n'
                                             'If the param "write" is used then the generated preferences will be outputted there.')
     parser.add_argument('--write', action='store_true', help="Set if the generated profile should be saved to a file")
-    parser.add_argument('-c', '--cost', type=int, default=0, help='The cost distribution to use over candidates\n'
-                                                                  '0 = uniform cost of 1 for item')
+    parser.add_argument('-c', '--cost', type=int, default=1, help='The cost distribution to use over candidates\n'
+                                                                  '0 = uniform cost of 1 for item\n'
+                                                                  '1 = Normal distribution with mean=100, and std=15')
     parser.add_argument('-r', '--rule', type=int, default=0, help='The rule to decide the winner\n'
                                                                   '0 = budget-plurality\n'
                                                                   '1 = budget-borda\n'
@@ -415,7 +423,7 @@ def main():
     if not args.write:
         profile = data.read_from_file(args.preferences)
         rule = initialize_rule(args.rule)
-        cost_vector = create_cost_distribution(profile.number_of_candidates, args.cost, 1)
+        cost_vector = create_cost_distribution(profile.number_of_candidates, args.cost, 15)
         winner_set = rule.get_winners(profile, args.budget, cost_vector)
         axiom = initialize_axiom(args.axiom)
         satisfied = axiom.is_satisfied(rule, profile, args.budget, cost_vector)
