@@ -212,7 +212,7 @@ class CopelandRule(VotingRule):
             for other_candidate in range(0, profile.number_of_candidates):
                 if other_candidate == candidate:
                     continue
-                if pairwise_wins[candidate, other_candidate] > 0.5:
+                if pairwise_wins[candidate][other_candidate] > 0.5:
                     candidate_scores[candidate] += 1
                 else:
                     candidate_scores[candidate] -= 1
@@ -444,6 +444,41 @@ class CopelandAxiom(Axiom):
         return self.value
 
 
+class GiniCoefficient(Axiom):
+    def __init__(self):
+        super().__init__("Gini Coefficient", 5)
+        # should always be between 1 or 0
+        self.value = 2.0
+
+    def is_satisfied(self, rule, profile, budget, cost):
+        winners = rule.get_winners(profile, budget, cost)
+
+        voter_scores = [0] * profile.number_of_candidates() #initialize a list of individual voters' regret count
+        for preference_order in profile:		#look at one voter in profile
+            score = profile.number_of_candidates - 1	#this is the utility score for the top-ranked item of this voter
+            for candidate in preference_order:		#go through all candidates in voter's preference_order
+                if candidate in winners:		#only add utility if candidate is not in winner set
+                    voter_scores[preference_order] += score
+                else:
+                    continue
+                score -= 1
+        total_score = 0
+        for score1 in voter_scores:
+            total_score += score1
+
+        for score1 in voter_scores:		#the following corresponds to two sums over set of voters
+            for score2 in voter_scores:
+                self.value = abs(score1-score2)/2*len(voter_scores)*total_score
+
+        return True
+
+    def has_value(self):
+        return True
+
+    def get_value(self):
+        return self.value
+
+
 def initialize_rule(rule):
     if rule == 0:
         return PluralityRule()
@@ -470,6 +505,8 @@ def initialize_axiom(axiom, axiom_parameter_1=200, axiom_parameter_2=1):
         return Regret()
     if axiom == 4:
         return CopelandAxiom()
+    if axiom == 5:
+        return GiniCoefficient()
     else:
         raise Exception("Illegal axiom number: " + str(axiom))
 
@@ -478,12 +515,12 @@ def create_cost_distribution(number_of_candidates, cost_distribution, distributi
     # uniform
     if cost_distribution == 0:
         return [distribution_parameter] * number_of_candidates
-    # turnicated normal distribution
     if cost_distribution == 1:
         std = float(distribution_parameter)
         mean = 100
         size = number_of_candidates
         X = np.random.normal(mean, std, size)
+        # we simply round it up
         return X.round().astype(int)
     else:
         raise Exception("Illegal cost distribution: " + str(cost_distribution))
