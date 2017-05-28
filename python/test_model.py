@@ -1,66 +1,66 @@
 import unittest
-import model as model
 import data
+import CR as cr
 
 profile = data.read_from_file("unanimous_profile.txt")
 budget = 1500
-normal_cost_distribution = 1
+normal_cost_distribution = 0
 
 class Tests(unittest.TestCase):
 
     def test_winner_determination_k_plurality(self):
-        rule = model.initialize_rule(0)
-        cost = model.create_cost_distribution(profile.number_of_candidates, normal_cost_distribution, 1)
+        rule = cr.initialize_rule(0)
+        cost = cr.create_cost_distribution(profile.number_of_candidates, normal_cost_distribution)
         winner_set = rule.get_winners(profile, budget, cost_vector=cost)
         self.assertEqual(len(winner_set), 10)
         self.assertTrue((lambda sum: sum >= 800, sum(cost)))
-        axiom = model.initialize_axiom(0)
+        axiom = cr.initialize_axiom(0)
         self.assertTrue(axiom.is_satisfied(rule, profile, budget, cost))
-        axiom = model.initialize_axiom(1)
+        axiom = cr.initialize_axiom(1)
         self.assertTrue(axiom.is_satisfied(rule, profile, 5, cost))
 
     def test_winner_determination_k_borda(self):
-        rule = model.initialize_rule(1)
-        cost = model.create_cost_distribution(profile.number_of_candidates, normal_cost_distribution, 1)
+        rule = cr.initialize_rule(1)
+        cost = cr.create_cost_distribution(profile.number_of_candidates, normal_cost_distribution)
         winner_set = rule.get_winners(profile, budget, cost_vector=cost)
         self.assertEqual(len(winner_set), 10)
         self.assertTrue((lambda sum: sum >= 800, sum(cost)))
-        axiom = model.initialize_axiom(0)
+        axiom = cr.initialize_axiom(0)
         self.assertTrue(axiom.is_satisfied(rule, profile, budget, cost))
-        axiom = model.initialize_axiom(1)
+        axiom = cr.initialize_axiom(1)
         self.assertTrue(axiom.is_satisfied(rule, profile, 5, cost))
 
     def test_winner_determination_copeland(self):
-        rule = model.initialize_rule(2)
-        cost = model.create_cost_distribution(profile.number_of_candidates, normal_cost_distribution, 1)
+        rule = cr.initialize_rule(2)
+        cost = cr.create_cost_distribution(profile.number_of_candidates, normal_cost_distribution)
         winner_set = rule.get_winners(profile, budget, cost_vector=cost)
         self.assertEqual(len(winner_set), 10)
         self.assertTrue((lambda sum: sum >= 800, sum(cost)))
-        axiom = model.initialize_axiom(0)
+        axiom = cr.initialize_axiom(0)
         self.assertTrue(axiom.is_satisfied(rule, profile, budget, cost))
-        axiom = model.initialize_axiom(1)
+        axiom = cr.initialize_axiom(1)
         self.assertTrue(axiom.is_satisfied(rule, profile, 5, cost))
 
     def test_winner_determination_knapsack(self):
-        rule = model.initialize_rule(3)
-        cost = model.create_cost_distribution(profile.number_of_candidates, normal_cost_distribution, 1)
+        rule = cr.initialize_rule(3)
+        cost = cr.create_cost_distribution(profile.number_of_candidates, normal_cost_distribution)
         winner_set = rule.get_winners(profile, budget, cost_vector=cost)
         self.assertEqual(len(winner_set), 10)
         self.assertTrue((lambda sum: sum >= 800, sum(cost)))
-        axiom = model.initialize_axiom(0)
+        axiom = cr.initialize_axiom(0)
         self.assertTrue(axiom.is_satisfied(rule, profile, budget, cost))
-        axiom = model.initialize_axiom(1)
+        axiom = cr.initialize_axiom(1)
         self.assertTrue(axiom.is_satisfied(rule, profile, 5, cost))
 
     def test_winner_determination_theta_rule(self):
-        rule = model.initialize_rule(4)
-        cost = model.create_cost_distribution(profile.number_of_candidates, normal_cost_distribution, 1)
+        rule = cr.initialize_rule(4)
+        cost = cr.create_cost_distribution(profile.number_of_candidates, normal_cost_distribution)
         winner_set = rule.get_winners(profile, budget, cost_vector=cost)
         self.assertEqual(len(winner_set), 10)
         self.assertTrue((lambda sum: sum >= 800, sum(cost)))
-        axiom = model.initialize_axiom(0)
+        axiom = cr.initialize_axiom(0)
         self.assertTrue(axiom.is_satisfied(rule, profile, budget, cost))
-        axiom = model.initialize_axiom(1)
+        axiom = cr.initialize_axiom(1)
         self.assertTrue(axiom.is_satisfied(rule, profile, 5, cost))
 
     def test_write(self):
@@ -70,7 +70,7 @@ class Tests(unittest.TestCase):
         os.remove(file_name)
 
     def test_normal_distribution(self):
-        cost = model.create_cost_distribution(profile.number_of_candidates, 1, 15)
+        cost = cr.create_cost_distribution(profile.number_of_candidates, normal_cost_distribution)
         self.assertTrue(max(cost) <= 150)
         self.assertTrue(min(cost) >= 50)
 
