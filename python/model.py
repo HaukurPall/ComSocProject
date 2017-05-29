@@ -12,6 +12,7 @@ class Preference:
 
     def __init__(self, preference_order):
         self.preference_order = [int(x) for x in preference_order]
+        self.standard_set = set([x for x in range(0, len(preference_order))])
 
     def __eq__(self, other):
         return self.preference_order == other.preference_order
@@ -58,11 +59,14 @@ class Preference:
     Generates a random preference order over a uniform distribution.
     """
 
-    @staticmethod
-    def generate_random_preference_order(m):
-        preference_set = set([x for x in range(0, m)])
-        preference_list = random.sample(preference_set, m)
+    def generate_random_preference_order(self):
+        preference_list = random.sample(self.standard_set, len(self.standard_set))
         return Preference(preference_list)
+
+    def reverse_preference_order(self):
+        old_order = copy.deepcopy(self.preference_order)
+        reversed(old_order)
+        return Preference(old_order)
 
     def index_based_swap(self, candidate_index, other_candidate_index):
         tmp = self.preference_order[candidate_index]
@@ -95,13 +99,14 @@ class Profile:
         self.borda_score = [x for x in range(self.number_of_candidates - 1, -1, -1)]
         self.plurality_score = [0 for x in range(self.number_of_candidates)]
         self.plurality_score[0] = 1
+        self.P = None
 
     def __add__(self, other):
         if self.number_of_candidates != other.number_of_candidates:
             raise Exception("Not the same number of candidates!")
         return Profile(self.number_of_voters + other.number_of_voters,
                        self.number_of_candidates,
-                       copy.deepcopy(self.preference_list) + copy.deepcopy(other.preference_list))
+                       self.preference_list + other.preference_list)
 
     def __str__(self):
         profile = ""
@@ -119,6 +124,8 @@ class Profile:
         return Profile(self.number_of_voters, self.number_of_candidates, new_list)
 
     def compute_pairwise_wins(self):
+        if self.P:
+            return self.P
         P = [[0 for x in range(self.number_of_candidates)] for x in range(self.number_of_candidates)]
         for preference_order in self.preference_list:
             for candidate in range(self.number_of_candidates):
@@ -127,9 +134,14 @@ class Profile:
                     if other_candidate == candidate:
                         P[candidate][other_candidate] += 1
                         continue
+                    if other_candidate < candidate:
+                        continue
                     if preference_order.is_x_more_preferred_than_y(candidate, other_candidate):
                         P[candidate][other_candidate] += 1
-        P = [[wins / float(self.number_of_candidates) for wins in candidate] for candidate in P]
+                    else:
+                        P[other_candidate][candidate] += 1
+        P = [[wins / float(self.number_of_voters) for wins in candidate] for candidate in P]
+        self.P = P
         return P
 
     def compute_utility_of_set(self, scoring_vector, winner_set):
@@ -297,14 +309,16 @@ class ThetaRule(VotingRule):
         ordered_domination = []
         for candidate, candidate_wins_prob in enumerate(pairwise_wins):
             ordered_domination.append((candidate, min(candidate_wins_prob)))
-        ordered_domination.sort(key=lambda tup: tup[1])
-        while not budget_finished or len(winners) == profile.number_of_candidates:
+        ordered_domination.sort(key=lambda tup: tup[1], reverse=True)
+        while not budget_finished and len(winners) == profile.number_of_candidates:
             candidate, obs_theta = ordered_domination[0]
             if budget - cost_vector[candidate] >= 0:
                 budget -= cost_vector[candidate]
                 ordered_domination = ordered_domination[1:]
                 winners.append(candidate)
                 self.final_theta = obs_theta
+            else:
+                budget_finished = True
         # we check if we can fill the budget even more
         for obs_pair in ordered_domination:
             candidate, obs_theta = obs_pair

@@ -80,7 +80,7 @@ def main():
     args = parser.parse_args()
 
     if args.generate:
-        run_generation()
+        run_polar_generation()
         return
 
     if args.read:
@@ -111,22 +111,71 @@ def main():
         data.write_to_file(args.preferences, profile)
 
 
-def run_generation():
+def run_base_generation():
     for i in range(100):
         voters = 5000
         candidates = 10
-        bases = 5000
-        swaps = 0
-        directory = "random"
-        preference_order = model.Preference.generate_random_preference_order(candidates)
-        profile = data.replicate_preference_order(preference_order, int(voters/bases))
+        bases = 1
+        swaps = 2
+        directory = "cluster_1"
+        preference_order = model.Preference([x for x in range(0, candidates)])
+        random_order = preference_order.generate_random_preference_order()
+        profile = data.replicate_preference_order(random_order, int(voters/bases))
         for base in range(bases - 1):
-            preference_order = model.Preference.generate_random_preference_order(candidates)
-            profile = profile + data.replicate_preference_order(preference_order, int(voters/bases))
-        profile = data.apply_noise(profile, swaps, 1)
+            random_order = preference_order.generate_random_preference_order()
+            profile = profile + data.replicate_preference_order(random_order, int(voters/bases))
+        data.apply_noise(profile, swaps, 1)
         if not os.path.exists(directory):
             os.makedirs(directory)
         data.write_to_file(os.path.join(directory, "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, bases, swaps) + ".txt"), profile)
+
+
+def run_polar_generation():
+    for i in range(100):
+        voters = 5000
+        candidates = 10
+        bases = 2
+        swaps = 2
+        directory = "cluster_2_polar"
+        preference_order = model.Preference([x for x in range(0, candidates)])
+        first_order = preference_order.generate_random_preference_order()
+        second_order = first_order.reverse_preference_order()
+        first_profile = data.replicate_preference_order(first_order, int(voters / bases))
+        second_profile = data.replicate_preference_order(second_order, int(voters / bases))
+        profile = first_profile + second_profile
+        data.apply_noise(profile, swaps, 1)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        data.write_to_file(os.path.join(directory, "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, bases, swaps) + ".txt"), profile)
+
+
+def run_similar_generation():
+    for i in range(100):
+        voters = 5000
+        candidates = 10
+        bases = 2
+        swaps = 3
+        directory = "cluster_2_similar"
+        preference_order = model.Preference([x for x in range(0, candidates)])
+        first_order = preference_order.generate_random_preference_order()
+        profile, swaps = get_similar_profile(bases, first_order, swaps, voters)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        data.write_to_file(os.path.join(directory, "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, bases, swaps) + ".txt"), profile)
+
+
+def get_similar_profile(bases, first_order, swaps, voters):
+    second_order = first_order.get_copy()
+    first_profile = data.replicate_preference_order(first_order, int(voters / bases))
+    second_profile = data.replicate_preference_order(second_order, 1)
+    data.apply_noise(second_profile, swaps, 1)
+    second_profile = data.replicate_preference_order(second_profile.preference_list[0], int(voters / bases))
+    profile = first_profile + second_profile
+    swaps = 250
+    data.apply_noise(profile, swaps, 1)
+    return profile, swaps
 
 
 def read_data_set():
@@ -135,7 +184,7 @@ def read_data_set():
     directory = "random"
     onlyfiles = [f for f in listdir(directory) if isfile(join(directory, f))]
 
-    budget = 1000
+    budget = 500
 
     rules = [model.PluralityRule(),
              model.BordaRule(),
@@ -151,11 +200,12 @@ def read_data_set():
     profile_number = 0
     outcome = []
     for file in onlyfiles:
-        if "v100:" not in file:
+        if "c1000:" not in file:
             continue
         profile_number += 1
-        profile = data.read_from_file(join(mypath, file))
+        profile = data.read_from_file(join(directory, file))
         cost_vector = create_cost_distribution(profile.number_of_candidates, 0)
+        print(str(profile_number))
         for rule in rules:
             winners = rule.get_winners(profile, budget, cost_vector)
             for axiom in axioms_but_unanimity:

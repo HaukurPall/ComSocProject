@@ -1,7 +1,6 @@
 import model
 import random
 import math
-import copy
 from collections import Counter as Counter
 
 
@@ -50,14 +49,12 @@ def write_to_file(file_name, profile):
 def replicate_preference_order(preference_order, number_of_times):
     list_of_preferences = []
     for i in range(number_of_times):
-        list_of_preferences.append(preference_order)
+        list_of_preferences.append(preference_order.get_copy())
     return model.Profile(number_of_times, len(preference_order.preference_order), list_of_preferences)
 
 
 def apply_noise(profile, swaps=1,
                 noisy_parameter=2):
-    # apply noise to the whole profile
-    profile = profile.get_copy()
     for preference_order in profile:
         for swap in range(swaps):
             swap_candidate = random.randint(0, profile.number_of_candidates - 1)
@@ -77,8 +74,6 @@ def apply_noise(profile, swaps=1,
                         preference_order.index_based_swap(swap_candidate, swap_candidate + distance)
                         break
                     distance += 1
-
-    return profile
 
 
 def noisy_distribution(distance, noisy_parameter):
