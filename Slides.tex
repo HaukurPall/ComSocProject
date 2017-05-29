@@ -129,7 +129,7 @@ Here should be a table with all the axioms for which we have proofs
 Let $\mathcal {W_B}$ be the set of all elements of $\mathcal{P}(A)$ s.t. $C(W)\leq B$. Utility is maximized if:
 
 \[
-W=\argmax_{W'\in \mathcal{W_B}}(u(W')) 
+W=\argmax_{W'\in \mathcal{W}_B}(u(W')) 
 \]
 
 	
@@ -162,9 +162,14 @@ This rule takes the voters preference orders and maximizes utility given the bud
 
 \begin{frame}{Voting Rules: Commitee of $\theta$-Winners}
 	
-We define a committee of $\theta$-winners as follows:  $\Theta=\{a\in A: \frac {\mathcal{N}_{a\succ b}}{N}\geq \theta\text {, for all } b\in A\setminus\{a\}\}$. Then W=$\Theta$ subject to the following optimization problem:
-	
-	\[\min \theta \text{ subject to } \sum_{a_i\in W}c(a_i)\leq B\]
+We define a news item's $\theta$-score as follows: \[\theta(a)=\min_{b\in A} \frac{\mathcal{N}_{a\succ b}}{N}\]
+
+The commitee of $\theta$-winners is then chosen as follows:
+
+\[W_1=\{\argmax_{a\in A}\theta(a)\}\cap \mathcal{W}_B\]
+\[W_n=W_{n-1}\cup \{\argmax_{a\in A\setminus W_{n-1}}\theta (a)\}\cap \mathcal{W}_{B-C(W_{n-1})}\]
+\[W=W_{|A|}\]
+
 \end{frame}
 
 %\bibliographystyle{apacite}
