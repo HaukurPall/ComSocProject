@@ -96,6 +96,13 @@ class Profile:
         self.plurality_score = [0 for x in range(self.number_of_candidates)]
         self.plurality_score[0] = 1
 
+    def __add__(self, other):
+        if self.number_of_candidates != other.number_of_candidates:
+            raise Exception("Not the same number of candidates!")
+        return Profile(self.number_of_voters + other.number_of_voters,
+                       self.number_of_candidates,
+                       copy.deepcopy(self.preference_list) + copy.deepcopy(other.preference_list))
+
     def __str__(self):
         profile = ""
         for preference_order_index, preference_order in enumerate(self.preference_list):
@@ -104,6 +111,12 @@ class Profile:
 
     def __getitem__(self, index):
         return self.preference_list[index]
+
+    def get_copy(self):
+        new_list = []
+        for preference_order in self.preference_list:
+            new_list.append(copy.deepcopy(preference_order))
+        return Profile(self.number_of_voters, self.number_of_candidates, new_list)
 
     def compute_pairwise_wins(self):
         P = [[0 for x in range(self.number_of_candidates)] for x in range(self.number_of_candidates)]
@@ -273,9 +286,8 @@ def solve_knapsack(W, weights, values):
 
 
 class ThetaRule(VotingRule):
-    def __init__(self, increment=0.05):
+    def __init__(self):
         super().__init__("Theta rule", 4)
-        self.increment = increment
         self.final_theta = -1.0
 
     def get_winners(self, profile, budget, cost_vector):
@@ -368,22 +380,26 @@ class ThetaMinority(Axiom):
     def __init__(self):
         super().__init__("Theta Minority", 2)
         self.value = False
-        self.is_present = False
 
     def is_satisfied(self, rule, winners, profile, budget, cost):
         winners.sort()
         theta_rule = ThetaRule()
         theta_ority_winners = theta_rule.get_winners(profile, budget, cost)
-        theta_ority_winners.sort()
-        if winners == theta_ority_winners:
-            self.value = theta_rule.final_theta
-            self.is_present = True
-            return True
-        else:
-            return False
+        pairwise_wins = profile.compute_pairwise_wins()
+        last_theta = 1.0
+        for winner_index, winner in enumerate(theta_ority_winners):
+            if min(pairwise_wins[winner]) < theta_rule.final_theta:
+                last_theta = theta_rule.final_theta
+                break
+            if winner in winners:
+                last_theta = min(pairwise_wins[winner])
+            else:
+                break
+        self.value = last_theta
+        return True
 
     def has_value(self):
-        return self.is_present
+        return True
 
     def get_value(self):
         return self.value
@@ -465,6 +481,25 @@ class GiniCoefficient(Axiom):
                 score += abs(score1-score2)
         self.value = score/float(2*len(voter_scores)*total_score)
 
+        return True
+
+    def has_value(self):
+        return True
+
+    def get_value(self):
+        return self.value
+
+
+class BudgetEfficiency(Axiom):
+    def __init__(self):
+        super().__init__("Budget Efficiency", 6)
+        self.value = 0.0
+
+    def is_satisfied(self, rule, winners, profile, budget, cost):
+        used_budget = 0
+        for winner in winners:
+            used_budget += cost[winner]
+        self.value = used_budget/budget
         return True
 
     def has_value(self):

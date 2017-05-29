@@ -18,11 +18,11 @@ def initialize_rule(rule):
         raise Exception("Illegal rule number: " + str(rule))
 
 
-def initialize_axiom(axiom, axiom_parameter_1=200, axiom_parameter_2=1):
+def initialize_axiom(axiom):
     if axiom == 0:
         return model.Unanimity()
     if axiom == 1:
-        return model.CommitteeMonotonicity(axiom_parameter_1, axiom_parameter_2)
+        return model.CommitteeMonotonicity(400, 100)
     if axiom == 2:
         return model.ThetaMinority()
     if axiom == 3:
@@ -31,6 +31,8 @@ def initialize_axiom(axiom, axiom_parameter_1=200, axiom_parameter_2=1):
         return model.CopelandAxiom()
     if axiom == 5:
         return model.GiniCoefficient()
+    if axiom == 6:
+        return model.BudgetEfficiency()
     else:
         raise Exception("Illegal axiom number: " + str(axiom))
 
@@ -110,25 +112,42 @@ def main():
 
 
 def run_generation():
-    for i in range(50):
-        voters = 100
+    for i in range(100):
+        voters = 5000
         candidates = 10
-        bases = 10
-        swaps = 5
-        profile = data.create_noisy_data(voters, candidates, bases, swaps, 2)
-        data.write_to_file(os.path.join("data_set", "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, bases, swaps) + ".txt"), profile)
+        bases = 5000
+        swaps = 0
+        directory = "random"
+        preference_order = model.Preference.generate_random_preference_order(candidates)
+        profile = data.replicate_preference_order(preference_order, int(voters/bases))
+        for base in range(bases - 1):
+            preference_order = model.Preference.generate_random_preference_order(candidates)
+            profile = profile + data.replicate_preference_order(preference_order, int(voters/bases))
+        profile = data.apply_noise(profile, swaps, 1)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        data.write_to_file(os.path.join(directory, "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, bases, swaps) + ".txt"), profile)
 
 
 def read_data_set():
     from os import listdir
     from os.path import isfile, join
-    mypath = "data_set"
-    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    directory = "random"
+    onlyfiles = [f for f in listdir(directory) if isfile(join(directory, f))]
 
     budget = 1000
 
-    rules = [model.PluralityRule(), model.BordaRule(), model.CopelandRule(), model.Knapsack(), model.ThetaRule()]
-    axioms_but_unanimity = [model.CommitteeMonotonicity(250, 1), model.ThetaMinority(), model.Regret(), model.CopelandAxiom(), model.GiniCoefficient()]
+    rules = [model.PluralityRule(),
+             model.BordaRule(),
+             model.CopelandRule(),
+             model.Knapsack(),
+             model.ThetaRule()]
+    axioms_but_unanimity = [model.CommitteeMonotonicity(budget*10, budget),
+                            model.ThetaMinority(),
+                            model.Regret(),
+                            model.CopelandAxiom(),
+                            model.GiniCoefficient(),
+                            model.BudgetEfficiency()]
     profile_number = 0
     outcome = []
     for file in onlyfiles:

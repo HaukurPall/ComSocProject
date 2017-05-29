@@ -1,6 +1,7 @@
 import model
 import random
 import math
+import copy
 from collections import Counter as Counter
 
 
@@ -46,45 +47,38 @@ def write_to_file(file_name, profile):
             file.write(",".join([str(preference_count), preference_name]) + "\n")
 
 
-def create_noisy_data(number_of_voters=10,
-                      number_of_candidates=10,
-                      number_of_base_preferences=1,
-                      swaps=1,
-                      noisy_parameter=2):
+def replicate_preference_order(preference_order, number_of_times):
     list_of_preferences = []
-    avg = number_of_voters / number_of_base_preferences
-    last = 0.0
-    # generate all the base profiles
-    while last < number_of_voters:
-        preference_order = model.Preference.generate_random_preference_order(number_of_candidates)
-        for voter in range(int(last), int(last + avg)):
-            list_of_preferences.append(preference_order.get_copy())
-            if voter == number_of_voters - 1:
-                break
-        last += avg
+    for i in range(number_of_times):
+        list_of_preferences.append(preference_order)
+    return model.Profile(number_of_times, len(preference_order.preference_order), list_of_preferences)
 
+
+def apply_noise(profile, swaps=1,
+                noisy_parameter=2):
     # apply noise to the whole profile
-    for preference in list_of_preferences:
+    profile = profile.get_copy()
+    for preference_order in profile:
         for swap in range(swaps):
-            swap_candidate = random.randint(0, number_of_candidates - 1)
+            swap_candidate = random.randint(0, profile.number_of_candidates - 1)
             direction = random.randint(0, 1)
             distance = 1
             # we swap upwards
             if direction == 0:
                 while swap_candidate - distance >= 0:
                     if random.random() <= noisy_distribution(distance, noisy_parameter):
-                        preference.index_based_swap(swap_candidate, swap_candidate - distance)
+                        preference_order.index_based_swap(swap_candidate, swap_candidate - distance)
                         break
                     distance += 1
 
             else:
-                while swap_candidate + distance <= preference.get_number_of_candidates() - 1:
+                while swap_candidate + distance <= preference_order.get_number_of_candidates() - 1:
                     if random.random() <= noisy_distribution(distance, noisy_parameter):
-                        preference.index_based_swap(swap_candidate, swap_candidate + distance)
+                        preference_order.index_based_swap(swap_candidate, swap_candidate + distance)
                         break
                     distance += 1
 
-    return model.Profile(number_of_voters, number_of_candidates, list_of_preferences)
+    return profile
 
 
 def noisy_distribution(distance, noisy_parameter):
