@@ -14,11 +14,21 @@
   \setbeamertemplate{navigation symbols}{}
   \setbeamertemplate{caption}[numbered]
 } 
-
+\usepackage{amsmath}
 \usepackage[english]{babel}
 \usepackage[utf8x]{inputenc}
-\usepackage{apacite}
 \usepackage[round]{natbib}
+\usepackage{bibentry}
+%\usepackage{biblatex}
+%\bibliography{references}
+\nobibliography*
+\setbeamercolor{bibliography entry author}{fg=black}
+\setbeamercolor{bibliography entry title}{fg=black} 
+\setbeamercolor{bibliography entry location}{fg=black} 
+\setbeamercolor{bibliography entry note}{fg=black} 
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\def\one{\mbox{1\hspace{-4.25pt}\fontsize{12}{14.4}\selectfont\textrm{1}}} % 11pt   
 
 
 
@@ -36,6 +46,7 @@ We seek to find good ways for a group of agents to spend a limited budget on a s
 	\begin{itemize}
 		\item Motivation: Two Scenarios
 		\item The Knapsack Problem for Multiple Agents
+		\item Formal Framework
 		\item Desirable Properties of Recommendation Sets
 		\item Budgeted Voting Rules
 		\item Results: Rules \& Property Satisfaction
@@ -88,9 +99,74 @@ For the single agent case, this problem is the well-known Knapsack Problem: How 
 
 However, if the knapsack is packed for a group with different preferences, there is no simple way to maximize utility. Thus a voting rule is needed.
 
+\end{frame}
+
 \begin{frame}{Formal Framework}
+We have a set of \emph {news items} $A=\{a_1,...,a_m\}$, 
+a set of \emph {recommended items} $W\subseteq A$, 
+a set of \emph {consumers} $N=\{n_1,...,n_n\}$, 
+a \emph {profile of preferences} over the set of items $\mathcal{R}\in \mathcal{L}^n$ 
+and a \emph {budget} $B\in \mathbb{R}_{\geq 0}$. %should be \mathbb
+
+We derive utilities from $\mathcal{R}$ employing a utility function $u_i:\mathcal{L}^n \times N \times  A \rightarrow \mathbb{N}$ assigning each news item its Borda score for the preference order of reader i. This function is extended to $u(a)=\sum_{i=1}^n a$, $u_i(W)=\sum_{a\in W}u_i(a)$ and $u(W)=\sum_{a\in W}u(a)$ for $W\in \mathcal{P}(A)$. Likewise each news item has a specific \emph{cost} $C: A \rightarrow \mathbb {N}$ that extends to sets by $C(W)=\sum_{a\in W}C(a)$.
+
+\end{frame}
+
+\begin{frame}{Desirable Properties: Axioms}
+
+Here should be a table with all the axioms for which we have proofs
+
+
+
+\begin{block}{Reference}
+	%\bibentry{Elkind2017}
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Desirable Properties: Utility Maximization}
+
+Let $\mathcal {W_B}$ be the set of all elements of $\mathcal{P}(A)$ s.t. $C(W)\leq B$. Utility is maximized if:
+
+\[
+W=\argmax_{W'\in \mathcal{W_B}}(u(W')) 
+\]
+
 	
 \end{frame}
 
+\begin{frame}{Desirable Properties: $\theta$-Minority Consistency}
+	
+A recommendation set is $\theta$-minority consistent if \[a\in W\text{ whenever }\frac {\mathcal{N}_{a\succ b}}{N}\geq \theta \text{ for all } b\in A\setminus \{b\} \]
+	
 \end{frame}
+
+\begin{frame}{Desirable Properties: $\delta$-Equality}
+	
+	Define the Gini-coefficient of a recommendation set as follows: 
+	
+	\[G(W)=\frac{\displaystyle{\sum_{i=1}^n \sum_{j=1}^n \left| u_i(W) - u_j(W) \right|}}{\displaystyle{2n* u(W)}}\]
+	
+	For $\delta\in [0,1]$, a recommendation set is $\delta$-egalitarian if $G(W)\leq \delta$. 
+	
+\end{frame}
+
+\begin{frame}{Voting Rules: Knapsack}
+
+This rule takes the voters preference orders and maximizes utility given the budget:
+\[
+\max_{W\in\mathcal{ W_B}} u(W)
+	\]
+	
+\end{frame}
+
+\begin{frame}{Voting Rules: Commitee of $\theta$-Winners}
+	
+We define a committee of $\theta$-winners as follows:  $\Theta=\{a\in A: \frac {\mathcal{N}_{a\succ b}}{N}\geq \theta\text {, for all } b\in A\setminus\{a\}\}$. Then W=$\Theta$ subject to the following optimization problem:
+	
+	\[\min \theta \text{ subject to } \sum_{a_i\in W}c(a_i)\leq B\]
+\end{frame}
+
+%\bibliographystyle{apacite}
+%\bibliography{references}
 \end{document}
