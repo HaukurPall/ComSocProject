@@ -281,21 +281,24 @@ class ThetaRule(VotingRule):
     def get_winners(self, profile, budget, cost_vector):
         pairwise_wins = profile.compute_pairwise_wins()
         winners = []
-        theta = 1.0
         budget_finished = False
-        while len(winners) != profile.number_of_candidates and not budget_finished:
-            for candidate, candidate_wins_prob in enumerate(pairwise_wins):
-                if min(candidate_wins_prob) >= theta:
-                    if budget - cost_vector[candidate] >= 0:
-                        winners.append(candidate)
-                        # we mark the candidate as terrible after it has been picked
-                        pairwise_wins[candidate] = [-1] * profile.number_of_candidates
-                        budget -= cost_vector[candidate]
-                    else:
-                        budget_finished = True
-                        self.final_theta = theta
-                        break
-            theta -= self.increment
+        ordered_domination = []
+        for candidate, candidate_wins_prob in enumerate(pairwise_wins):
+            ordered_domination.append((candidate, min(candidate_wins_prob)))
+        ordered_domination.sort(key=lambda tup: tup[1])
+        while not budget_finished or len(winners) == profile.number_of_candidates:
+            candidate, obs_theta = ordered_domination[0]
+            if budget - cost_vector[candidate] >= 0:
+                budget -= cost_vector[candidate]
+                ordered_domination = ordered_domination[1:]
+                winners.append(candidate)
+                self.final_theta = obs_theta
+        # we check if we can fill the budget even more
+        for obs_pair in ordered_domination:
+            candidate, obs_theta = obs_pair
+            if budget - cost_vector[candidate] >= 0:
+                budget -= cost_vector[candidate]
+                winners.append(candidate)
         return winners
 
 
@@ -456,9 +459,11 @@ class GiniCoefficient(Axiom):
         for score1 in voter_scores:
             total_score += score1
 
+        score = 0.0
         for score1 in voter_scores:		#the following corresponds to two sums over set of voters
             for score2 in voter_scores:
-                self.value = abs(score1-score2)/2*len(voter_scores)*total_score
+                score += abs(score1-score2)
+        self.value = score/float(2*len(voter_scores)*total_score)
 
         return True
 
