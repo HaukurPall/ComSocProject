@@ -192,7 +192,7 @@ class PluralityRule(VotingRule):
     def rank_candidates(self, profile):
         score = VotingRule.compute_scores_with_vector(profile.plurality_score, profile)
         ordered_score = [(x, score[x]) for x in range(len(score))]
-        ordered_score.sort(key=lambda tup: tup[1])
+        ordered_score.sort(key=lambda tup: tup[1], reverse=True)
         return [candidate[0] for candidate in ordered_score]
 
     def has_scoring(self):
@@ -210,7 +210,7 @@ class BordaRule(VotingRule):
     def rank_candidates(self, profile):
         score = VotingRule.compute_scores_with_vector(profile.borda_score, profile)
         ordered_score = [(x, score[x]) for x in range(len(score))]
-        ordered_score.sort(key=lambda tup: tup[1])
+        ordered_score.sort(key=lambda tup: tup[1], reverse=True)
         return [candidate[0] for candidate in ordered_score]
 
     def has_scoring(self):
@@ -242,7 +242,7 @@ class CopelandRule(VotingRule):
     def rank_candidates(self, profile):
         score = CopelandRule.compute_copeland_score(profile)
         ordered_score = [(x, score[x]) for x in range(len(score))]
-        ordered_score.sort(key=lambda tup: tup[1])
+        ordered_score.sort(key=lambda tup: tup[1], reverse=True)
         return [candidate[0] for candidate in ordered_score]
 
     def has_scoring(self):
@@ -479,21 +479,28 @@ class CopelandAxiom(Axiom):
     def is_satisfied(self, rule, winners, profile, budget, cost):
         score = CopelandRule.compute_copeland_score(profile)
         ordered_score = [(x, score[x]) for x in range(len(score))]
-        ordered_score.sort(key=lambda tup: tup[1])
+        ordered_score.sort(key=lambda tup: tup[1], reverse=True)
         copland_ranks = [candidate[0] for candidate in ordered_score]
         pairwise_wins = profile.compute_pairwise_wins()
         lowest = 1.0
+
         for winner in copland_ranks:
-            if winner not in winners:
-                break
-            else:
+            if winner in winners:
                 wins = 0
-                for competitor in pairwise_wins[winner]:
+                for competitor in range(profile.number_of_candidates):
                     if winner == competitor:
                         continue
-                    else:
+                    if pairwise_wins[winner][competitor] > 0.5:
                         wins += 1
-                lowest = wins/(profile.number_of_candidates - 1)
+                if lowest > wins/(profile.number_of_candidates - 1):
+                    lowest = wins/(profile.number_of_candidates - 1)
+
+                if budget - cost[winner] < 0:
+                    break
+                else:
+                    budget -= cost[winner]
+            else:
+                break
         self.value = lowest
         return True
 
