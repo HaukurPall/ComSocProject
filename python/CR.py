@@ -80,11 +80,12 @@ def main():
     args = parser.parse_args()
 
     if args.generate:
-        run_polar_generation()
+        run_base_generation(10)
+        run_base_generation(100)
         return
 
     if args.read:
-        read_data_set()
+        read_data_set("random", 10)
         return
 
     if not args.write:
@@ -111,31 +112,31 @@ def main():
         data.write_to_file(args.preferences, profile)
 
 
-def run_base_generation():
+def run_base_generation(candidates):
     for i in range(100):
         voters = 5000
-        candidates = 10
-        bases = 1
-        swaps = 2
-        directory = "cluster_1"
+        candidates = candidates
+        bases = 2
+        noise_swaps = int(candidates/4)
+        directory = "cluster_2"
         preference_order = model.Preference([x for x in range(0, candidates)])
         random_order = preference_order.generate_random_preference_order()
         profile = data.replicate_preference_order(random_order, int(voters/bases))
         for base in range(bases - 1):
             random_order = preference_order.generate_random_preference_order()
             profile = profile + data.replicate_preference_order(random_order, int(voters/bases))
-        data.apply_noise(profile, swaps, 1)
+        data.apply_noise(profile, noise_swaps, 1)
         if not os.path.exists(directory):
             os.makedirs(directory)
-        data.write_to_file(os.path.join(directory, "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, bases, swaps) + ".txt"), profile)
+        data.write_to_file(os.path.join(directory, "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, bases, noise_swaps) + ".txt"), profile)
 
 
-def run_polar_generation():
+def run_polar_generation(candidates):
     for i in range(100):
         voters = 5000
-        candidates = 10
+        candidates = candidates
         bases = 2
-        swaps = 2
+        noise_swaps = int(candidates/4)
         directory = "cluster_2_polar"
         preference_order = model.Preference([x for x in range(0, candidates)])
         first_order = preference_order.generate_random_preference_order()
@@ -143,6 +144,30 @@ def run_polar_generation():
         first_profile = data.replicate_preference_order(first_order, int(voters / bases))
         second_profile = data.replicate_preference_order(second_order, int(voters / bases))
         profile = first_profile + second_profile
+        data.apply_noise(profile, noise_swaps, 1)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        data.write_to_file(os.path.join(directory,
+                                        "{}_v{}:c{}:b{}:s{}"
+                                        .format(i, voters, candidates, bases, noise_swaps) + ".txt"),
+                           profile)
+
+
+def run_random_generation(candidates):
+    for i in range(100):
+        voters = 5000
+        candidates = candidates
+        bases = voters
+        swaps = 0
+        directory = "random"
+        preference_order = model.Preference([x for x in range(0, candidates)])
+        list_of_preferences = []
+        for x in range(voters):
+            list_of_preferences.append(preference_order.generate_random_preference_order())
+        profile = model.Profile(number_of_candidates=candidates,
+                                number_of_voters=voters,
+                                preference_list=list_of_preferences)
         data.apply_noise(profile, swaps, 1)
 
         if not os.path.exists(directory):
@@ -150,38 +175,40 @@ def run_polar_generation():
         data.write_to_file(os.path.join(directory, "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, bases, swaps) + ".txt"), profile)
 
 
-def run_similar_generation():
+def run_similar_generation(candidates):
     for i in range(100):
         voters = 5000
-        candidates = 10
+        candidates = candidates
         bases = 2
-        swaps = 3
+        similar_swaps = int(candidates/2)
+        noise_swaps = int(candidates/4)
         directory = "cluster_2_similar"
         preference_order = model.Preference([x for x in range(0, candidates)])
         first_order = preference_order.generate_random_preference_order()
-        profile, swaps = get_similar_profile(bases, first_order, swaps, voters)
+        profile = get_similar_profile(bases, first_order, similar_swaps, noise_swaps, voters)
 
         if not os.path.exists(directory):
             os.makedirs(directory)
-        data.write_to_file(os.path.join(directory, "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, bases, swaps) + ".txt"), profile)
+        data.write_to_file(os.path.join(directory,
+                                        "{}_v{}:c{}:b{}:s{}"
+                                        .format(i, voters, candidates, bases, noise_swaps) + ".txt"),
+                           profile)
 
 
-def get_similar_profile(bases, first_order, swaps, voters):
+def get_similar_profile(bases, first_order, initial_swaps, noise_swaps, voters):
     second_order = first_order.get_copy()
     first_profile = data.replicate_preference_order(first_order, int(voters / bases))
     second_profile = data.replicate_preference_order(second_order, 1)
-    data.apply_noise(second_profile, swaps, 1)
+    data.apply_noise(second_profile, initial_swaps, 1)
     second_profile = data.replicate_preference_order(second_profile.preference_list[0], int(voters / bases))
     profile = first_profile + second_profile
-    swaps = 250
-    data.apply_noise(profile, swaps, 1)
-    return profile, swaps
+    data.apply_noise(profile, noise_swaps, 1)
+    return profile
 
 
-def read_data_set():
+def read_data_set(directory, candidates):
     from os import listdir
     from os.path import isfile, join
-    directory = "random"
     onlyfiles = [f for f in listdir(directory) if isfile(join(directory, f))]
 
     budget = 500
@@ -198,32 +225,35 @@ def read_data_set():
                             model.GiniCoefficient(),
                             model.BudgetEfficiency()]
     profile_number = 0
-    outcome = []
-    for file in onlyfiles:
-        if "c1000:" not in file:
-            continue
-        profile_number += 1
-        profile = data.read_from_file(join(directory, file))
-        cost_vector = create_cost_distribution(profile.number_of_candidates, 0)
-        print(str(profile_number))
-        for rule in rules:
-            winners = rule.get_winners(profile, budget, cost_vector)
-            for axiom in axioms_but_unanimity:
-                satisfied = axiom.is_satisfied(rule, winners, profile, budget, cost_vector)
-                if satisfied:
-                    if axiom.has_value():
-                        outcome.append((rule.number, axiom.number, profile_number, axiom.get_value()))
+    with open("_".join([directory, str(candidates)]) + ".csv", "w") as out_file:
+        for file in onlyfiles:
+            filename_pattern = "c"+str(candidates)+":"
+            if filename_pattern not in file:
+                continue
+            profile_number += 1
+            profile = data.read_from_file(join(directory, file))
+            cost_vector = create_cost_distribution(profile.number_of_candidates, 0)
+            print(str(profile_number))
+            for rule in rules:
+                winners = rule.get_winners(profile, budget, cost_vector)
+                for axiom in axioms_but_unanimity:
+                    satisfied = axiom.is_satisfied(rule, winners, profile, budget, cost_vector)
+                    if satisfied:
+                        if axiom.has_value():
+                            out_file.write(",".join([str(rule.number),
+                                                 str(axiom.number),
+                                                 str(profile_number),
+                                                 str(axiom.get_value())]) + "\n")
+                        else:
+                            out_file.write(",".join([str(rule.number),
+                                                 str(axiom.number),
+                                                 str(profile_number),
+                                                 str(1)]) + "\n")
                     else:
-                        outcome.append((rule.number, axiom.number, profile_number, 1))
-                else:
-                    outcome.append((rule.number, axiom.number, profile_number, 0))
-    write_conlusions_to_file(outcome, "greg_test.csv")
-
-
-def write_conlusions_to_file(outcome, filename):
-    with open(filename, "w") as file:
-        for line in outcome:
-            file.write(",".join([str(line[0]), str(line[1]), str(line[2]), str(line[3])]) + "\n")
+                        out_file.write(",".join([str(rule.number),
+                                             str(axiom.number),
+                                             str(profile_number),
+                                             str(0)]) + "\n")
 
 if __name__ == "__main__":
     main()
