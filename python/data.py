@@ -20,6 +20,10 @@ def read_from_file(file_path):
         index += 1
         number_of_voters = int(number_of_voters)
 
+        cost_vector = file_list[index].strip().split(",")
+        cost_vector = [int(cost) for cost in cost_vector]
+        index += 1
+
         preference_list = []
         for line in file_list[index:]:
             preference_order = line.strip().split(",")
@@ -27,10 +31,10 @@ def read_from_file(file_path):
             preference_count = preference_order[0]
             for count in range(preference_count):
                 preference_list.append(model.Preference([x - 1 for x in preference_order[1:]]))
-        return model.Profile(number_of_voters, number_of_candidates, preference_list)
+        return model.Profile(number_of_voters, number_of_candidates, preference_list), cost_vector
 
 
-def write_to_file(file_name, profile):
+def write_to_file(file_name, profile, cost_vector):
     with open(file_name, "w") as file:
         file.write(str(profile.number_of_candidates) + "\n")
         for candidate in range(profile.number_of_candidates):
@@ -41,7 +45,7 @@ def write_to_file(file_name, profile):
             preference_name = ",".join([str(x + 1) for x in preference])
             counter[preference_name] += 1
         file.write(",".join([str(sum(counter.values())), str(sum(counter.values())), str(len(list(counter)))]) + "\n")
-
+        file.write(",".join([str(cost) for cost in cost_vector]) + "\n")
         for preference_name, preference_count in counter.most_common():
             file.write(",".join([str(preference_count), preference_name]) + "\n")
 
