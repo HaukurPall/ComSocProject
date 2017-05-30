@@ -11,7 +11,7 @@ class Preference:
     """
 
     def __init__(self, preference_order):
-        self.preference_order = [int(x) for x in preference_order]
+        self.preference_order = np.array([int(x) for x in preference_order])
         self.standard_set = set([x for x in range(0, len(preference_order))])
 
     def __eq__(self, other):
@@ -25,35 +25,7 @@ class Preference:
     """
 
     def is_x_more_preferred_than_y(self, x, y):
-        return self.preference_order.index(x) < self.preference_order.index(y)
-
-    """
-    Returns a new preference order in which x has been placed first
-    """
-
-    def place_x_first(self, x):
-        old_order = copy.deepcopy(self.preference_order)
-        old_order.remove(x)
-        return Preference([x] + old_order)
-
-    """
-    Returns a new preference order in which x has been placed last
-    """
-
-    def place_x_last(self, x):
-        old_order = copy.deepcopy(self.preference_order)
-        old_order.remove(x)
-        return Preference(old_order + [x])
-
-    """
-    Returns a new preference order in which the list of preference order has been placed last
-    """
-
-    def place_preferences_last(self, list_of_preferences):
-        old_order = copy.deepcopy(self.preference_order)
-        for preference in list_of_preferences:
-            old_order.remove(preference)
-        return Preference(old_order + list_of_preferences)
+        return np.where(self.preference_order == x) < np.where(self.preference_order == y)
 
     """
     Generates a random preference order over a uniform distribution.
