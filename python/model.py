@@ -265,13 +265,15 @@ class Knapsack(VotingRule):
 
 def get_knapsack_items(K, weight, weights, candidates):
     selected_candidates = []
-    current_weight = weight
-    item_number = len(K) - 1
-    while weight != 0 and item_number != 0:
-        if K[item_number][current_weight] != K[item_number - 1][current_weight]:
-            selected_candidates.append(candidates[item_number - 1])
-            weight -= weights[item_number - 1]
-        item_number -= 1
+    item_index = len(K) - 1
+    while weight != 0 and item_index != 0:
+        candidate_index = item_index - 1
+        if K[item_index][weight] != K[item_index - 1][weight]:
+            selected_candidates.append(candidates[candidate_index])
+            weight -= weights[candidate_index]
+            # we reset our counter
+            item_index = len(K)
+        item_index -= 1
     return selected_candidates
 
 
