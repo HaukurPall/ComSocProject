@@ -2,7 +2,6 @@
 # Date: 20th May 2017
 import copy
 import random
-import math
 import numpy as np
 
 class Preference:
@@ -36,9 +35,7 @@ class Preference:
         return Preference(preference_list)
 
     def reverse_preference_order(self):
-        old_order = copy.deepcopy(self.preference_order)
-        reversed(old_order)
-        return Preference(old_order)
+        return Preference(self.preference_order[::-1])
 
     def index_based_swap(self, candidate_index, other_candidate_index):
         tmp = self.preference_order[candidate_index]
@@ -72,6 +69,7 @@ class Profile:
         self.plurality_score = [0 for x in range(self.number_of_candidates)]
         self.plurality_score[0] = 1
         self.P = None
+        self.computed = False
 
     def __add__(self, other):
         if self.number_of_candidates != other.number_of_candidates:
@@ -116,6 +114,21 @@ class Profile:
         self.P = P
         return P
 
+    #def compute_pairwise_wins(self):
+    #    if self.computed:
+    #        return self.P
+    #    P = np.identity(self.number_of_candidates)
+    #    for preference_order in self.preference_list:
+    #        for i in range(self.number_of_candidates - 1):
+    #            winner = preference_order[i]
+    #            worse_candidates = preference_order[i + 1:]
+    #           for loser in worse_candidates:
+    #                P[winner][loser] += 1
+    #   P /= float(self.number_of_voters)
+    #    self.P = P
+    #    self.computed = True
+    #    return P
+
     def compute_utility_of_set(self, scoring_vector, winner_set):
         candidate_scores = VotingRule.compute_scores_with_vector(scoring_vector, self)
         return sum([candidate_scores[winner] for winner in winner_set])
@@ -136,33 +149,25 @@ class VotingRule:
     def get_winners(self, profile, budget, cost_vector):
         pass
 
-    """
-    Returns a winner using a tiebreaker (lexicographically)
-    """
+    def rank_candidates(self, profile):
+        pass
 
-    @staticmethod
-    def break_ties(winners):
-        first_winner = min(winners)
-        tie_losers = copy.deepcopy(winners)
-        tie_losers.remove(first_winner)
-        return first_winner, tie_losers
+    def has_scoring(self):
+        pass
 
     """
     Returns a list of winners using the score and cut method.
     Chooses the highest candidate which does not cost more than the remaining budget.
     """
-
     @staticmethod
-    def cut_score(budget, candidate_scores, cost_vector):
+    def cut_score(budget, candidate_ranks, cost_vector):
         winners = []
         moneyh_to_spend = budget
-        for index in range(0, len(cost_vector)):
-            candidate = candidate_scores.index(max(candidate_scores))
+        for index in range(len(cost_vector)):
+            candidate = candidate_ranks[index]
             if moneyh_to_spend - cost_vector[candidate] < 0:
                 # we can't afford more stuff - but there might be a cheaper candidate down the line.
                 continue
-            # we essentially mark it as terrible
-            candidate_scores[candidate] = -math.inf
             winners.append(candidate)
             moneyh_to_spend -= cost_vector[candidate]
         return winners
@@ -181,8 +186,17 @@ class PluralityRule(VotingRule):
         super().__init__("Budget-Plurality rule", 0)
 
     def get_winners(self, profile, budget, cost_vector):
-        candidate_scores = VotingRule.compute_scores_with_vector(profile.plurality_score, profile)
-        return self.cut_score(budget, candidate_scores, cost_vector)
+        candidate_ranks = self.rank_candidates(profile)
+        return self.cut_score(budget, candidate_ranks, cost_vector)
+
+    def rank_candidates(self, profile):
+        score = VotingRule.compute_scores_with_vector(profile.plurality_score, profile)
+        ordered_score = [(x, score[x]) for x in range(len(score))]
+        ordered_score.sort(key=lambda tup: tup[1])
+        return [candidate[0] for candidate in ordered_score]
+
+    def has_scoring(self):
+        return True
 
 
 class BordaRule(VotingRule):
@@ -190,8 +204,17 @@ class BordaRule(VotingRule):
         super().__init__("Budget-Borda rule", 1)
 
     def get_winners(self, profile, budget, cost_vector):
-        candidate_scores = VotingRule.compute_scores_with_vector(profile.borda_score, profile)
-        return self.cut_score(budget, candidate_scores, cost_vector)
+        candidate_ranks = self.rank_candidates(profile)
+        return self.cut_score(budget, candidate_ranks, cost_vector)
+
+    def rank_candidates(self, profile):
+        score = VotingRule.compute_scores_with_vector(profile.borda_score, profile)
+        ordered_score = [(x, score[x]) for x in range(len(score))]
+        ordered_score.sort(key=lambda tup: tup[1])
+        return [candidate[0] for candidate in ordered_score]
+
+    def has_scoring(self):
+        return True
 
 
 class CopelandRule(VotingRule):
@@ -213,8 +236,17 @@ class CopelandRule(VotingRule):
         return candidate_scores
 
     def get_winners(self, profile, budget, cost_vector):
-        candidate_scores = CopelandRule.compute_copeland_score(profile)
-        return self.cut_score(budget, candidate_scores, cost_vector)
+        candidate_ranks = self.rank_candidates(profile)
+        return self.cut_score(budget, candidate_ranks, cost_vector)
+
+    def rank_candidates(self, profile):
+        score = CopelandRule.compute_copeland_score(profile)
+        ordered_score = [(x, score[x]) for x in range(len(score))]
+        ordered_score.sort(key=lambda tup: tup[1])
+        return [candidate[0] for candidate in ordered_score]
+
+    def has_scoring(self):
+        return True
 
 
 class Knapsack(VotingRule):
@@ -233,6 +265,12 @@ class Knapsack(VotingRule):
         values = [tup[2] for tup in ordered_candidate_cost]
         knapsack_table = solve_knapsack(budget, ordered_cost_vector, values)
         return get_knapsack_items(knapsack_table, budget, ordered_cost_vector, candidates)
+
+    def rank_candidates(self, profile):
+        pass
+
+    def has_scoring(self):
+        return False
 
 
 def get_knapsack_items(K, weight, weights, candidates):
@@ -276,14 +314,18 @@ class ThetaRule(VotingRule):
         super().__init__("Theta rule", 4)
         self.final_theta = -1.0
 
-    def get_winners(self, profile, budget, cost_vector):
+    def rank_by_theta(self, profile):
         pairwise_wins = profile.compute_pairwise_wins()
-        winners = []
-        budget_finished = False
         ordered_domination = []
         for candidate, candidate_wins_prob in enumerate(pairwise_wins):
             ordered_domination.append((candidate, min(candidate_wins_prob)))
         ordered_domination.sort(key=lambda tup: tup[1], reverse=True)
+        return ordered_domination
+
+    def get_winners(self, profile, budget, cost_vector):
+        winners = []
+        budget_finished = False
+        ordered_domination = self.rank_by_theta(profile)
         while not budget_finished and len(winners) == profile.number_of_candidates:
             candidate, obs_theta = ordered_domination[0]
             if budget - cost_vector[candidate] >= 0:
@@ -300,6 +342,12 @@ class ThetaRule(VotingRule):
                 budget -= cost_vector[candidate]
                 winners.append(candidate)
         return winners
+
+    def rank_candidates(self, profile):
+        return [candidate[0] for candidate in self.rank_by_theta(profile)]
+
+    def has_scoring(self):
+        return True
 
 
 class Axiom:
@@ -349,12 +397,19 @@ class CommitteeMonotonicity(Axiom):
         self.increment = increment
 
     def is_satisfied(self, rule, winners, profile, budget, cost):
-        while budget <= self.max_budget:
-            budget += self.increment
-            new_winners = rule.get_winners(profile, budget, cost)
+        if rule.has_scoring():
+            candidate_ranking = rule.rank_candidates(profile)
+            total_winners = len(winners)
             for winner in winners:
-                if winner not in new_winners:
+                if candidate_ranking.index(winner) >= total_winners:
                     return False
+        else:
+            while budget <= self.max_budget:
+                budget += self.increment
+                new_winners = rule.get_winners(profile, budget, cost)
+                for winner in winners:
+                    if winner not in new_winners:
+                        return False
         return True
 
     def has_value(self):
@@ -370,7 +425,6 @@ class ThetaMinority(Axiom):
         self.value = False
 
     def is_satisfied(self, rule, winners, profile, budget, cost):
-        winners.sort()
         theta_rule = ThetaRule()
         theta_ority_winners = theta_rule.get_winners(profile, budget, cost)
         pairwise_wins = profile.compute_pairwise_wins()
@@ -423,6 +477,7 @@ class CopelandAxiom(Axiom):
         self.value = 2.0
 
     def is_satisfied(self, rule, winners, profile, budget, cost):
+        lowest = 2.0
         pairwise_wins = profile.compute_pairwise_wins()
         for winner in winners:
             wins = 0
@@ -432,8 +487,9 @@ class CopelandAxiom(Axiom):
                 # strictly greater
                 if pairwise_wins[winner][competitor] > 0.5:
                     wins += 1
-            if self.value > wins/float(profile.number_of_candidates - 1):
-                self.value = wins/float(profile.number_of_candidates - 1)
+            if lowest > wins/float(profile.number_of_candidates - 1):
+                lowest = wins/float(profile.number_of_candidates - 1)
+        self.value = lowest
         return True
 
     def has_value(self):

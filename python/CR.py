@@ -80,12 +80,12 @@ def main():
     args = parser.parse_args()
 
     if args.generate:
-        run_base_generation(10)
-        run_base_generation(100)
+        run_polar_generation(10)
+        run_polar_generation(20)
         return
 
     if args.read:
-        read_data_set("random", 10)
+        read_data_set("cluster_2_polar", 10)
         return
 
     if not args.write:
