@@ -477,18 +477,16 @@ class CopelandAxiom(Axiom):
         self.value = 2.0
 
     def is_satisfied(self, rule, winners, profile, budget, cost):
-        lowest = 2.0
-        pairwise_wins = profile.compute_pairwise_wins()
-        for winner in winners:
-            wins = 0
-            for competitor in range(profile.number_of_candidates):
-                if winner == competitor:
-                    continue
-                # strictly greater
-                if pairwise_wins[winner][competitor] > 0.5:
-                    wins += 1
-            if lowest > wins/float(profile.number_of_candidates - 1):
-                lowest = wins/float(profile.number_of_candidates - 1)
+        score = CopelandRule.compute_copeland_score(profile)
+        ordered_score = [(x, score[x]) for x in range(len(score))]
+        ordered_score.sort(key=lambda tup: tup[1])
+        copland_ranks = [candidate[0] for candidate in ordered_score]
+        lowest = 1.0
+        for winner in copland_ranks:
+            if winner not in winners:
+                break
+            else:
+                lowest = score[winner]/(profile.number_of_candidates - 1)
         self.value = lowest
         return True
 
