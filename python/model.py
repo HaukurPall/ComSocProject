@@ -481,12 +481,19 @@ class CopelandAxiom(Axiom):
         ordered_score = [(x, score[x]) for x in range(len(score))]
         ordered_score.sort(key=lambda tup: tup[1])
         copland_ranks = [candidate[0] for candidate in ordered_score]
+        pairwise_wins = profile.compute_pairwise_wins()
         lowest = 1.0
         for winner in copland_ranks:
             if winner not in winners:
                 break
             else:
-                lowest = score[winner]/(profile.number_of_candidates - 1)
+                wins = 0
+                for competitor in pairwise_wins[winner]:
+                    if winner == competitor:
+                        continue
+                    else:
+                        wins += 1
+                lowest = wins/(profile.number_of_candidates - 1)
         self.value = lowest
         return True
 
