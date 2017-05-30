@@ -8,7 +8,7 @@
 %
 \mode<presentation>
 {
-  \usetheme{Madrid}      % or try Darmstadt, Madrid, Warsaw, ...
+  \usetheme{Darmstadt}      % or try Darmstadt, Madrid, Warsaw, ...
   \usecolortheme{default} % or try albatross, beaver, crane, ...
   \usefonttheme{default}  % or try serif, structurebold, ...
   \setbeamertemplate{navigation symbols}{}
@@ -34,7 +34,7 @@
 
 \title{Budget-constrained Recommendation of a Set of Alternatives for Common Use}
 \author{Silvan Hungersb\"{u}hler \& Haukur J\'{o}nsson \& Grzegorsz Lisowski \& Max Rapp}
-\date{17/05/2017}
+\date{01/06/2017}
 
 \AtBeginSection[]
 {
@@ -84,18 +84,40 @@
 	
 \end{frame}
 
-\begin{frame}{General Problem Statement}
-	At a higher level of abstraction, we seek to find good ways for a group of agents to spend a limited budget on a set of alternatives which they all have to consume and over which they have different preferences. 
-
-\end{frame}
-
 \begin{frame}{Outline}
+	In general, our project was to find good ways for a group of agents to spend a limited budget on a set of alternatives which they all have to consume and over which they have different preferences. 
+	
 	\tableofcontents
+	
+	Our starting point was the literature on multiwinner rules and budgeted social choice.
+	
+	References here
 \end{frame}
 	
 \section{Formal Framework}
 
 \begin{frame}{Formal Framework}
+	
+We work in a framework familiar from this course...
+\begin{itemize}
+
+	
+\item A set of \emph {news items} $A=\{a_1,...,a_m\}$
+\item A set of \emph {recommended items} $W\subseteq A$
+\item A set of \emph {consumers} $N=\{n_1,...,n_n\}$
+\item A \emph {profile of preferences} over the set of items
+ $\mathcal{R}\in \mathcal{L}^n$
+
+\end{itemize}
+
+...which we additionally enrich by...
+\begin{itemize}
+	\item A utility function $u_i:\mathcal{L}^n \times N \times  A \rightarrow \mathbb{N}$ assigning each news item its Borda score for the preference order of reader i.
+	\item A \emph{cost function} $C: A \rightarrow \mathbb {N}$
+\end{itemize}
+
+\end{frame}
+\begin{frame}{stuff}
 We have a set of \emph {news items} $A=\{a_1,...,a_m\}$, 
 a set of \emph {recommended items} $W\subseteq A$, 
 a set of \emph {consumers} $N=\{n_1,...,n_n\}$, 
@@ -103,12 +125,11 @@ a \emph {profile of preferences} over the set of items $\mathcal{R}\in \mathcal{
 and a \emph {budget} $B\in \mathbb{R}_{\geq 0}$. %should be \mathbb
 
 We derive utilities from $\mathcal{R}$ employing a utility function $u_i:\mathcal{L}^n \times N \times  A \rightarrow \mathbb{N}$ assigning each news item its Borda score for the preference order of reader i. This function is extended to $u(a)=\sum_{i=1}^n a$, $u_i(W)=\sum_{a\in W}u_i(a)$ and $u(W)=\sum_{a\in W}u(a)$ for $W\in \mathcal{P}(A)$. Likewise each news item has a specific \emph{cost} $C: A \rightarrow \mathbb {N}$ that extends to sets by $C(W)=\sum_{a\in W}C(a)$.
-
 \end{frame}
 
 \section{Desirable Properties of Recommendation Sets}
 
-\begin{frame}{Desirable Properties: Axioms}
+\begin{frame}{Axioms}
 
 Here should be a table with all the axioms for which we have proofs
 
@@ -120,9 +141,9 @@ Here should be a table with all the axioms for which we have proofs
 
 \end{frame}
 
-\begin{frame}{Desirable Properties: Utility Maximization}
+\begin{frame}{Utility Maximization}
 
-Let $\mathcal {W_B}$ be the set of all elements of $\mathcal{P}(A)$ s.t. $C(W)\leq B$. Utility is maximized if:
+Let $\mathcal {W_B}$ be the set of all elements of $\mathcal{P}(A)$ s.t. $C(W)\leq B$. Extend the utility function to sets by putting  $u(a)=\sum_{i=1}^n$ and $u(W)=\sum_{a\in W}u(a)$ for $W\in \mathcal{P}(A)$. Utility is maximized if:
 
 \[
 W=\argmax_{W'\in \mathcal{W}_B}(u(W')) 
@@ -131,25 +152,21 @@ W=\argmax_{W'\in \mathcal{W}_B}(u(W'))
 	
 \end{frame}
 
-\begin{frame}{Desirable Properties: $\theta$-Minority Consistency}
+\begin{frame}{$\theta$-Minority Consistency}
 	
 A recommendation set is $\theta$-minority consistent if \[a\in W\text{ whenever }\frac {\mathcal{N}_{a\succ b}}{N}\geq \theta \text{ for all } b\in A\setminus \{b\} \]
 	
 \end{frame}
 
-\begin{frame}{Desirable Properties: $\delta$-Equality}
+\begin{frame}{$\delta$-Equality}
 	
-	Define the Gini-coefficient of a recommendation set as follows: 
-	
-	\[G(W)=\frac{\displaystyle{\sum_{i=1}^n \sum_{j=1}^n \left| u_i(W) - u_j(W) \right|}}{\displaystyle{2n* u(W)}}\]
-	
-	For $\delta\in [0,1]$, a recommendation set is $\delta$-egalitarian if $G(W)\leq \delta$. 
+	For $\delta\in [0,1]$, a recommendation set is $\delta$-egalitarian if its Gini-coefficient $G(W)$ is smaller than $\delta$.
 	
 \end{frame}
 
 \section{Budgeted Voting Rules}
 
-\begin{frame}{Voting Rules: Knapsack}
+\begin{frame}{Utility Maximization}
 
 This rule takes the voters preference orders and maximizes utility given the budget:
 \[
@@ -158,11 +175,11 @@ This rule takes the voters preference orders and maximizes utility given the bud
 	
 \end{frame}
 
-\begin{frame}{Voting Rules: Commitee of $\theta$-Winners}
+\begin{frame}{Committee of $\theta$-Winners}
 	
 We define a news item's $\theta$-score as follows: \[\theta(a)=\min_{b\in A} \frac{\mathcal{N}_{a\succ b}}{N}\]
 
-The commitee of $\theta$-winners is then chosen as follows:
+The committee of $\theta$-winners is then chosen as follows:
 
 \[W_1=\{\argmax_{a\in A}\theta(a)\}\cap \mathcal{W}_B\]
 \[W_n=W_{n-1}\cup \{\argmax_{a\in A\setminus W_{n-1}}\theta (a)\}\cap \mathcal{W}_{B-C(W_{n-1})}\]
@@ -170,13 +187,13 @@ The commitee of $\theta$-winners is then chosen as follows:
 
 \end{frame}
 
-\begin{frame}{Voting Rules: Further Rules}
+\begin{frame}{Further Rules}
 	Further we tested budgetized versions of the k-Plurality, k-Borda and k-Copeland rules. 
 \end{frame}
 
 \section{Methods}
 
-\begin{frame}{Methods: Proofs \& Data-Generation}
+\begin{frame}{Proofs \& Data-Generation}
 
 We proved satisfaction or failure of satisfaction of the axioms. In addition we simulated the behaviour of the voting rules with respect to the desirable properties and the failed axioms. 
 
@@ -184,31 +201,31 @@ For this purpose, since unfortunately good real world data was hard to find, we 
 
 \end{frame}
 
-\begin{frame}{Methods: Statistical Analysis}
+\begin{frame}{Statistical Analysis}
 	Greg should write something here.
 \end{frame}
 
 \section{Results}
 
-\begin{frame}{Results I: Axioms}
+\begin{frame}{Axioms}
 	
 	Here a table with the rules and which axioms they satisfy
 	
 \end{frame}
 
-\begin{frame}{Results II: Utility Maximization}
+\begin{frame}{Utility Maximization}
 	
 \end{frame}
 
-\begin{frame}{Results III: $theta$-Minority Consistency}
+\begin{frame}{$\theta$-Minority Consistency}
 	
 \end{frame}
 
-\begin{frame}{Results IV: $\delta$-Equality}
+\begin{frame}{$\delta$-Equality}
 	
 \end{frame}
 
-\begin{frame}{Results V: An Overall Best Rule?}
+\begin{frame}{An Overall Best Rule?}
 	
 \end{frame}
 
