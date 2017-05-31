@@ -220,9 +220,12 @@ The General Budget-compatible Threshold committee is then chosen as follows:
 
 \begin{frame}{Proofs \& Data-Generation}
 
-We proved satisfaction or failure of satisfaction of the axioms. In addition we simulated the behaviour of the voting rules with respect to the desirable properties and the failed axioms. 
-
-For this purpose, since unfortunately good real world data was hard to find, we generated datasets randomly to our needs. We generated one dataset of small profiles with 5000 readers and 10 news items and one dataset of large profiles with 5000 readers and 100 news items. In addition, for each dataset we used various procedures to generate fully random profiles as well as profiles of several degrees of "fragmentization" from 1 to 100 clusters of preference orders.
+\begin{itemize}
+\item We proved satisfaction or failure of satisfaction of the axioms.
+\item We observed and evaluate the behavior of all rules under different circumstances.
+\item To this end, we generated a large number of profiles of various types (#news-items, alignment of preferences etc.).
+\item Wrote a program that automatically tests rule-profile combinations for satisfaction of all axioms and then compared the rules' statistical performance.
+\end{itemize}
 
 \end{frame}
 
