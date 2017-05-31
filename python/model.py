@@ -518,15 +518,18 @@ class GiniCoefficient(Axiom):
         self.value = 2.0
 
     def is_satisfied(self, rule, winners, profile, budget, cost):
-        voter_scores = [0] * profile.number_of_candidates #initialize a list of individual voters' regret count
-        for preference_order in profile:		#look at one voter in profile
-            score = profile.number_of_candidates - 1	#this is the utility score for the top-ranked item of this voter
-            for candidate in preference_order:		#go through all candidates in voter's preference_order
-                if candidate in winners:		#only add utility if candidate is not in winner set
+
+        voter_scores = [0] * profile.number_of_candidates
+        total_score_for_voter = (profile.number_of_candidates-1)*profile.number_of_candidates/2
+        for preference_order in profile:
+            counter = 0
+            for candidate in preference_order:
+                score = (profile.number_of_candidates - 1 - counter)/total_score_for_voter
+                if candidate in winners:
                     voter_scores[candidate] += score
                 else:
                     continue
-                score -= 1
+                counter += 1
         total_score = 0.0
         for score1 in voter_scores:
             total_score += score1
