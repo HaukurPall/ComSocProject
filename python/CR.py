@@ -81,13 +81,13 @@ def main():
     args = parser.parse_args()
 
     if args.generate:
-        run_similar_generation(10)
-        run_similar_generation(20)
+        run_fraction_generation_1(10, [0.5, 0.1, 0.1, 0.1, 0.1, 0.1])
+        run_fraction_generation_1(20, [0.5, 0.1, 0.1, 0.1, 0.1, 0.1])
         return
 
     if args.read:
-        read_data_set("random", 10)
-        read_data_set("random", 20)
+        read_data_set("fraction_0.8_0.05_0.05_0.05_0.05", 10)
+        read_data_set("fraction_0.8_0.05_0.05_0.05_0.05", 20)
         return
 
     cost_vector = create_cost_distribution(args.candidates, 0)
@@ -114,15 +114,14 @@ def main():
         data.write_to_file(args.preferences, profile, cost_vector)
 
 
-def run_base_generation(candidates):
+def run_base_generation(candidates, bases):
     for i in range(100):
         print(str(i))
         cost_vector = create_cost_distribution(candidates, 0)
         voters = 5000
         candidates = candidates
-        bases = 2
         noise_swaps = int(candidates / 4)
-        directory = "cluster_2"
+        directory = "cluster_" + str(bases)
         preference_order = model.Preference([x for x in range(0, candidates)])
         random_order = preference_order.generate_random_preference_order()
         profile = data.replicate_preference_order(random_order, int(voters / bases))
@@ -134,6 +133,32 @@ def run_base_generation(candidates):
             os.makedirs(directory)
         data.write_to_file(
             os.path.join(directory, "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, bases, noise_swaps) + ".txt"),
+            profile, cost_vector)
+
+
+def run_fraction_generation_1(candidates, fractions):
+    for i in range(100):
+        print(str(i))
+        cost_vector = create_cost_distribution(candidates, 0)
+        voters = 5000
+        candidates = candidates
+        noise_swaps = int(candidates / 4)
+        population = [int(voters * fraction) for fraction in fractions]
+        fraction_string = "_".join([str(fraction) for fraction in fractions])
+        directory = "fraction_" + fraction_string
+        preference_order = model.Preference([x for x in range(0, candidates)])
+
+        random_order = preference_order.generate_random_preference_order()
+        profile = (data.replicate_preference_order(random_order, population[0]))
+        for fraction in population[1:]:
+            random_order = preference_order.generate_random_preference_order()
+            new_profile = data.replicate_preference_order(random_order, fraction)
+            profile = profile + new_profile
+        data.apply_noise(profile, noise_swaps, 1)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        data.write_to_file(
+            os.path.join(directory, "{}_v{}:c{}:b{}:s{}".format(i, voters, candidates, 5, noise_swaps) + ".txt"),
             profile, cost_vector)
 
 
