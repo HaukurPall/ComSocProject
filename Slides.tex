@@ -15,17 +15,18 @@
   \setbeamertemplate{caption}[numbered]
 } 
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage[english]{babel}
-\usepackage[utf8x]{inputenc}
+%\usepackage[utf8x]{inputenc}
 \usepackage[round]{natbib}
-\usepackage{bibentry}
+%\usepackage{bibentry}
 %\usepackage{biblatex}
-%\bibliography{references}
-\nobibliography*
-\setbeamercolor{bibliography entry author}{fg=black}
-\setbeamercolor{bibliography entry title}{fg=black} 
-\setbeamercolor{bibliography entry location}{fg=black} 
-\setbeamercolor{bibliography entry note}{fg=black} 
+
+%\nobibliography*
+%\setbeamercolor{bibliography entry author}{fg=black}
+%\setbeamercolor{bibliography entry title}{fg=black} 
+%\setbeamercolor{bibliography entry location}{fg=black} 
+%\setbeamercolor{bibliography entry note}{fg=black} 
 \DeclareMathOperator*{\argmax}{arg\,max}
 
 \def\one{\mbox{1\hspace{-4.25pt}\fontsize{12}{14.4}\selectfont\textrm{1}}} % 11pt   
@@ -44,13 +45,14 @@
 }
 
 \begin{document}
+	
 \begin{frame}
 	\titlepage
 \end{frame}
 
 \begin{frame}{Motivation: A problem with the News Media}
 	
-	News Media are vulnerable to the following vicious cycle: People are biased. They are more likely to consumn media content that confirms their biases. Thus media have an incentive to feed their consumers' bias. If they follow it, this can entrench division and erode the commonly accepted factual base. If they don't, a part of the population may come to believe that their world view is not represented by the media and become increasingly distrusting of the news.
+	People are biased. They are more likely to consumn media content that confirms their biases. Thus media have an incentive to feed their consumers' bias. If they follow it, this can entrench division and erode the commonly accepted factual base. If they don't, a part of the population may come to believe that their world view is not represented by the media and become increasingly distrusting of the news.
 	
 	
 	
@@ -67,13 +69,8 @@
 	Online social networks often recommend news articles to their users based on an algorithm that infers preferences from user's past behavior and demographic properties. Such a News Feed may have little overlap for people belonging to different social or political spheres.
 	
 	
-	Imagine a news aggregator that asks users for an amount of time they want to read everyday, scrapes their social network accounts and based on this information creates a list of essential readings of the desired length.
-	
-	
-	
-	
-	
-	
+	Imagine a news aggregator that asks users for an amount of time they want to read every day, scrapes their social network accounts and based on this information creates a list of essential readings of the desired length.
+		
 \end{frame}
 
 \begin{frame}{Scenario II: A  Newspaper Page}
@@ -117,31 +114,44 @@ We work in a framework familiar from this course...
 \end{itemize}
 
 \end{frame}
-\begin{frame}{stuff}
-We have a set of \emph {news items} $A=\{a_1,...,a_m\}$, 
-a set of \emph {recommended items} $W\subseteq A$, 
-a set of \emph {consumers} $N=\{n_1,...,n_n\}$, 
-a \emph {profile of preferences} over the set of items $\mathcal{R}\in \mathcal{L}^n$ 
-and a \emph {budget} $B\in \mathbb{R}_{\geq 0}$. %should be \mathbb
+%\begin{frame}{stuff}
+%We have a set of \emph {news items} $A=\{a_1,...,a_m\}$, 
+%a set of \emph {recommended items} $W\subseteq A$, 
+%a set of \emph {consumers} $N=\{n_1,...,n_n\}$, 
+%a \emph {profile of preferences} over the set of items $\mathcal{R}\in \mathcal{L}^n$ 
+%and a \emph {budget} $B\in \mathbb{R}_{\geq 0}$. %should be \mathbb
 
-We derive utilities from $\mathcal{R}$ employing a utility function $u_i:\mathcal{L}^n \times N \times  A \rightarrow \mathbb{N}$ assigning each news item its Borda score for the preference order of reader i. This function is extended to $u(a)=\sum_{i=1}^n a$, $u_i(W)=\sum_{a\in W}u_i(a)$ and $u(W)=\sum_{a\in W}u(a)$ for $W\in \mathcal{P}(A)$. Likewise each news item has a specific \emph{cost} $C: A \rightarrow \mathbb {N}$ that extends to sets by $C(W)=\sum_{a\in W}C(a)$.
-\end{frame}
+%We derive utilities from $\mathcal{R}$ employing a utility function $u_i:\mathcal{L}^n \times N \times  A \rightarrow \mathbb{N}$ assigning each news item its Borda score for the preference order of reader i. This function is extended to $u(a)=\sum_{i=1}^n a$, $u_i(W)=\sum_{a\in W}u_i(a)$ and $u(W)=\sum_{a\in W}u(a)$ for $W\in \mathcal{P}(A)$. Likewise each news item has a specific \emph{cost} $C: A \rightarrow \mathbb {N}$ that extends to sets by $C(W)=\sum_{a\in W}C(a)$.
+%\end{frame}
 
 \section{Desirable Properties of Recommendation Sets}
 
 \begin{frame}{Axioms}
 
-Here should be a table with all the axioms for which we have proofs
+We devised budgeted variants of the following multiwinner axioms:
 
-
+\begin{itemize}
+	\item Non-Imposition 
+	\item Consistency 
+	\item Homogeneity 
+	\item Monotonicity      
+	\item Committee-Monotonicity 
+	%\item Consensus Committee   
+	%\item Fixed Majority(cf. $\sigma$-Minority-Consistency)
+	\item Unanimity
+\end{itemize}
 
 \begin{block}{Reference}
+	Elkind, Edith
+	and Faliszewski, Piotr
+	and Skowron, Piotr
+	and Slinko, Arkadii: "Properties of multiwinner voting rules", \emph{Social Choice and Welfare}, Vol 48, n° 3, 2017, pp.599-632.
 	%\bibentry{Elkind2017}
 \end{block}
 
 \end{frame}
 
-\begin{frame}{Utility Maximization}
+\begin{frame}{Budgeted Utility Maximization}
 
 Let $\mathcal {W_B}$ be the set of all elements of $\mathcal{P}(A)$ s.t. $C(W)\leq B$. Extend the utility function to sets by putting  $u(a)=\sum_{i=1}^n$ and $u(W)=\sum_{a\in W}u(a)$ for $W\in \mathcal{P}(A)$. Utility is maximized if:
 
@@ -166,7 +176,7 @@ A recommendation set is $\theta$-minority consistent if \[a\in W\text{ whenever 
 
 \section{Budgeted Voting Rules}
 
-\begin{frame}{Utility Maximization}
+\begin{frame}{Budgeted Utility Maximization (BUM)}
 
 This rule takes the voters preference orders and maximizes utility given the budget:
 \[
@@ -175,11 +185,11 @@ This rule takes the voters preference orders and maximizes utility given the bud
 	
 \end{frame}
 
-\begin{frame}{Committee of $\theta$-Winners}
+\begin{frame}{Lowest General Budget-compatible Threshold (LGBT)}
 	
 We define a news item's $\theta$-score as follows: \[\theta(a)=\min_{b\in A} \frac{\mathcal{N}_{a\succ b}}{N}\]
 
-The committee of $\theta$-winners is then chosen as follows:
+The General Budget-compatible Threshold committee is then chosen as follows:
 
 \[W_1=\{\argmax_{a\in A}\theta(a)\}\cap \mathcal{W}_B\]
 \[W_n=W_{n-1}\cup \{\argmax_{a\in A\setminus W_{n-1}}\theta (a)\}\cap \mathcal{W}_{B-C(W_{n-1})}\]
@@ -188,7 +198,7 @@ The committee of $\theta$-winners is then chosen as follows:
 \end{frame}
 
 \begin{frame}{Further Rules}
-	Further we tested budgetized versions of the k-Plurality, k-Borda and k-Copeland rules. 
+	Further we tested budgetized versions of the k-Plurality (BP), k-Borda (BB) and k-Copeland (BC) rules. 
 \end{frame}
 
 \section{Methods}
@@ -209,11 +219,25 @@ For this purpose, since unfortunately good real world data was hard to find, we 
 
 \begin{frame}{Axioms}
 	
-	Here a table with the rules and which axioms they satisfy
+	\begin{table}[]
+		\centering
+		\caption{Axiom Satisfaction}
+		\label{my-label}
+		\begin{tabular}{|l|l|l|l|l|l|}
+			\hline
+			Axiom \backslash Rule             & BP            & BB                   & BC                & BUM     & LGBT \\ \hline
+			Non-Imposition         & $\times$                         & $\times$                        & $\times$                        & $\times$                        & $\times$                                         \\ \hline
+			Consistency            & ?                    & ?                    & ?                    & ?                    & ?                                     \\ \hline
+			Homogeneity            & \checkmark                       & \checkmark                       & \checkmark                       & \checkmark                       & \checkmark                                        \\ \hline
+			Monotonicity           & \checkmark                       & \checkmark                       & \checkmark                       & \checkmark                       & \checkmark                                        \\ \hline
+			Committee-Monotonicity & $\times$                        & $\times$                        & $\times$                        & $\times$                         & $\times$                                         \\ \hline
+			Unanimity              & $\times$                         & \checkmark                       & \checkmark                       & $\times$                         & \checkmark                                        \\ \hline
+		\end{tabular}
+	\end{table}
 	
 \end{frame}
 
-\begin{frame}{Utility Maximization}
+\begin{frame}{Budgeted Utility Maximization}
 	
 \end{frame}
 
@@ -245,9 +269,10 @@ For this purpose, since unfortunately good real world data was hard to find, we 
 	\tableofcontents
 \end{frame}
 
+%\bibliography{references}
+%\bibliographystyle{plainnat}
+%\nobibliography{references}
 
 
-
-%\bibliographystyle{apacite}
 %\bibliography{references}
 \end{document}
