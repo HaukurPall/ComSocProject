@@ -160,7 +160,7 @@ We devised budgeted variants of the following multiwinner axioms:
 
 \begin{frame}{Budgeted Utility Maximization}
 
-Let $\mathcal {W_B}$ be the set of all elements of $\mathcal{P}(A)$ s.t. $C(W)\leq B$. Extend the utility function to sets by putting  $u(a)=\sum_{i=1}^n$ and $u(W)=\sum_{a\in W}u(a)$ for $W\in \mathcal{P}(A)$. Utility is maximized if:
+Let $\mathcal {W_B}$ be the set of all elements of $\mathcal{P}(A)$ s.t. $C(W)\leq B$. Extend the utility function to sets by putting $u(a)=\sum_{i=1}^n u_i(a)$ and $u(W)=\sum_{a\in W} u(a)$ for $W\in \mathcal{P}(A)$. Utility is maximized if:
 
 \[
 W=\argmax_{W'\in \mathcal{W}_B}(u(W')) 
@@ -171,7 +171,7 @@ W=\argmax_{W'\in \mathcal{W}_B}(u(W'))
 
 \begin{frame}{$\theta$-Minority Consistency}
 	
-A recommendation set is $\theta$-minority consistent if \[a\in W\text{ whenever }\frac {\mathcal{N}_{a\succ b}}{N}\geq \theta \text{ for all } b\in A\setminus \{b\} \]
+A recommendation set has a least general threshold $\theta$ if \[a\in W\text{ whenever }\frac {\mathcal{N}_{a\succ b}}{N}\geq \theta \text{ for all } b\in A\setminus \{a\} \]
 	
 \end{frame}
 
@@ -192,14 +192,14 @@ This rule takes the voters preference orders and maximizes utility given the bud
 	
 \end{frame}
 
-\begin{frame}{Lowest General Budget-compatible Threshold (LGBT)}
+\begin{frame}{Least General Budget-compatible Threshold (LGBT)}
 	
-We define a news item's $\theta$-score as follows: \[\theta(a)=\min_{b\in A} \frac{\mathcal{N}_{a\succ b}}{N}\]
+We define a news item's $\theta$-score as follows: \[\theta(a)=\min_{b\in A \setminus {\{a\}}} \frac{\mathcal{N}_{a\succ b}}{N}\]
 
 The General Budget-compatible Threshold committee is then chosen as follows:
 
 \[W_1=\{\argmax_{a\in A}\theta(a)\}\cap \mathcal{W}_B\]
-\[W_n=W_{n-1}\cup \{\argmax_{a\in A\setminus W_{n-1}}\theta (a)\}\cap \mathcal{W}_{B-C(W_{n-1})}\]
+\[W_n=W_{n-1}\cup (\{\argmax_{a\in A\setminus W_{n-1}}\theta (a)\}\cap \mathcal{W}_{B-C(W_{n-1})})\]
 \[W=W_{|A|}\]
 
 \end{frame}
@@ -271,8 +271,12 @@ For this purpose, since unfortunately good real world data was hard to find, we 
 	
 \end{frame}
 
-\begin{frame}
-	\tableofcontents
+\begin{frame}{Conclusions}
+
+	A formal framework which gives a recomendation set based on a profile, subject to a budget constraint.
+
+	We presented two new rules
+
 \end{frame}
 
 %\bibliography{references}
