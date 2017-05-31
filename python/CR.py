@@ -260,12 +260,14 @@ def read_data_set(directory, candidates):
              model.CopelandRule(),
              model.Knapsack(),
              model.ThetaRule()]
-    axioms_but_unanimity = [model.CommitteeMonotonicity(budget * 10, budget),
-                            model.ThetaMinority(),
-                            model.Regret(),
-                            model.CopelandAxiom(),
-                            model.GiniCoefficient(),
-                            model.BudgetEfficiency()]
+    axioms_but_unanimity = [
+        model.CommitteeMonotonicity(budget * 10, budget),
+        model.ThetaMinority(),
+        model.Regret(),
+        model.CopelandAxiom(),
+        model.GiniCoefficient(),
+        model.BudgetEfficiency()
+    ]
     profile_number = 0
     with open("_".join([directory, str(candidates)]) + ".csv", "w") as out_file:
         for file in onlyfiles:
