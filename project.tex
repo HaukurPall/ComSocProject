@@ -7,11 +7,16 @@
 \usepackage{ijcai17}
 % Use the postscript times font!
 \usepackage{times}
-\def\one{\mbox{1\hspace{-4.25pt}\fontsize{12}{14.4}\selectfont\textrm{1}}} % 11pt
+%\def\one{\mbox{1\hspace{-4.25pt}\fontsize{10}{13.4}\selectfont\textrm{1}}} % 11pt
 \usepackage{amsmath}
+\usepackage{subfigure}
 \usepackage{amssymb}
 \usepackage{amsthm}
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother
 \usepackage{hyperref}
+\usepackage{graphicx}
 \usepackage{apacite}
 \usepackage{interval}
 \usepackage{color}
@@ -41,12 +46,19 @@
 % Put where the files are available in the appropriate places.
 
 
-\title{Collective Recommendations}
+\title{Collective Media Recommendations via Social Choice \vspace{-2ex}
+}
 \author{
-    Haukur J{\'o}nsson \\ haukurpalljonsson@gmail.com \And
-    Silvan Hungerb{\"u}hler \\   silvan.hungerbuehler@bluewin.ch \AND
-    Grzegorz Lisowski \\  grzegorz.adam.lisowski@gmail.com \And
-    Max Rapp \\  maxgrapp@gmail.com
+    Haukur P{\'a}ll J{\'o}nsson, %\\ haukurpalljonsson@gmail.com
+   % \And
+    Silvan Hungerb{\"u}hler, %\\   silvan.hungerbuehler@bluewin.ch
+   % \AND
+    Grzegorz Lisowski, %\\  grzegorz.adam.lisowski@gmail.com
+   % \And
+    Max Rapp
+    %\\  maxgrapp@gmail.com
+    \\ University of Amsterdam, Netherlands
+   \vspace{-2ex}
 }
 
 
@@ -55,28 +67,32 @@
 \begin{document}
 
 \maketitle
-
 \begin{abstract}
-This is a placeholder for the glorious abstract yet to come.
+We tackle the practical problem of finding a good mechanism to recommend a collective set of {\em news items} to a group of media consumers with possibly very disparate individual interest in the available items. For our analysis, we adapt a formal framework from voting theory in {\em Computational Social Choice} to the media setting in order to compare the performance of five recommendation mechanisms with respect to desirable properties of recommended sets.
 \end{abstract}
 
 \section{Introduction}\label{introduction}
-Media are in crisis. Between highly personalized social media - as Facebook or Twitter - that drive political
-fragmentation, partizanship and the absence of a common factual base in society on the one hand,
-and waning interest in the traditional, entirely unpersonalized newspaper on the other, there is little space to maneuver for news providers.
- How to balance the publics demand for news that is relevant to collective interests of both large and small groups in society and, at once,
- reflects individual interests.
 
-The present paper takes a step towards solving this problem by designing and testing a number of recommendation mechanism for news articles.
+How to balance the media's core function of providing news that is relevant to society at large against the increasing economic necessity of offering an individually tailored product?
+News media face a dilemma: Either submit to highly personalized news feeds on online social media networks that drive political
+fragmentation, partisanship and contribute to the erosion of society's commonly accepted factual base; or risk losing disgruntled readers, who feel that ``their'' issues are inadequately represented in the mainstream media, to less reliable Internet news outlets.
+
+
+%Media are in crisis. Between highly personalized social media - as Facebook or Twitter - that drive political
+%fragmentation, partizanship and the absence of a common factual base in society on the one hand,
+%and waning interest in the traditional, entirely unpersonalized newspaper on the other, there is little space to maneuver for news providers.
+%How to balance the publics demand for news that is relevant to collective interests of both large and small groups in society and, at once, reflects individual interests.
+
+The present paper takes a step towards addressing this problem by designing and testing a number of recommendation mechanisms for news articles.
  Based on the tastes consumers have for particular news items, the mechanism constructs a collection of essential articles for the entire group.
  All that is needed for the mechanism to work is an ordering of the news items from first to last for each individual.
- The way in which this preference ordering is elicited from the individual need not be of concern here;
+ The way in which this preference ordering is elicited from the individual is left open;
  depending on the concrete application, the data can be thought of as explicitly provided by the consumers or gathered by data mining techniques.
 
 Naturally, there are certain properties one would expect such a collection of essential articles to have.
- The total length of recommended articles for a newspapers title page, for example, should not exceed its character limit.
+ The total length of recommended articles for a newspaper's title page, for example, should not exceed its character limit which relates to a problem of making collective choices with a restricted budget \cite{lu2011budgeted}.
  Likewise, there are relations between the essential articles and the rankings by the individuals one would like to see respected by a recommendation mechanism.
-By way of example, if all consumers detest a certain news item,
+For instance, if all consumers detest a certain news item,
  then it should certainly not be featured in the essential collection instead of another item much liked by everybody.
 
 This paper aims at better understanding of collective recommendation mechanisms in media settings by
@@ -87,9 +103,9 @@ We proceed by proving a small number of theorems and running simulations to esti
 
 The paper is structured as follows: In \hyperlink{framework}{Section 2} we provide the formal definition of the recommendation problem as we want to study it.
 In \hyperlink{axioms}{Section 3} we formally present desirable properties a collection of recommended articles ought to have.
-In \hyperlink{rules}{Section  4} we propose three rules for the task of turning individual preferences into a single recommendation. \hyperlink{proofs}{Section 5} presents theorems.
+In \hyperlink{rules}{Section  4} we propose five rules for the task of turning individual preferences into a single recommendation. \hyperlink{proofs}{Section 5} presents theorems.
 \hyperlink{simulations}{Section 6} contains the methodology and presentation of our simulation results, while
-\hyperlink{conclusion}{Section 6} concludes.
+\hyperlink{conclusion}{Section 7} concludes.
 %This is how you {\it do italics}
 
 %And this is how you {\em emphasize}
@@ -105,147 +121,149 @@ In \hyperlink{rules}{Section  4} we propose three rules for the task of turning 
 
 %A bold {\bf letter}
 \hypertarget{framework}{\section{Formal Framework}}
-
-
 This section specifies the formal framework we use.
 There is a set of \emph {news items} $A=\{a_1,\dotsc,a_m\}$, a subset of which are the \emph {recommended items} $W\subseteq A$ for a group of \emph {consumers} $N=\{n_1,\dotsc,n_n\}$. Each consumer has preferences over $A$ represented by a strict, total order $\succ_i$ for $i\in \{ n_1, \dotsc, n_n\}$. Let $\mathcal{L}(A)$ be the set of such orders. Then the preference orders of a set of consumers $N$ over news items $A$ form a \emph {profile of preferences} $\mathcal{R}\in \mathcal{L}^n$. We put $\mathcal{R}+\mathcal{R'}$ to denote the concatenation of two profiles with disjoint voter sets. Likewise, for any $n\in \mathbf{N}$, $n\mathcal{R}$ denotes the concatenation of $n$ identical copies of $\mathcal{R}$.
 
 Each item in $A$ is assigned a specific \emph{cost} by a function
- $C: A \rightarrow {\mathbb N}$ and \emph{utility for a consumer i} by a function $u_i:\mathcal{L}^n \times N \times  A \rightarrow \mathbb{N}$. We extend these functions to be also defined on sets: The cost of a recommendation set $W\subseteq A$ is given by $C(W)=\sum_{w\in W}C(w)$; its \emph {total utility} by $u(W)=\sum_{a\in W} u(a)$ where $u(a)=\sum_{i=1}^n u_i(a)$.
-We follow \citeA[4]{lu2011budgeted} in deriving pseudo-utilities from readers' preference orders. For present purposes we used the Borda score, that is $u_i$ outputs the value $m-1$ for consumer $i$'s top item, $m-2$ for the second one and so forth. However, nothing hinges on this and many different approaches are compatible with our framework.
-
-Depending on the context, cost could be interpreted as the time it takes to read an article,
+ $C:A \rightarrow {\mathbb N}$ and \emph{utility for a consumer i} by a function $u_i:\mathcal{L}^n \times N \times  A \rightarrow \mathbb{N}$. We denote by $C(A)$ the image of $A$ under $C$. We extend these functions to be also defined on sets: The cost of a recommendation set $W\subseteq A$ is given by $C(W)=\sum_{w\in W}C(w)$; its \emph {total utility} by $u(W)=\sum_{a\in W} u(a)$ where $u(a)=\sum_{i=1}^n u_i(a)$.
+We follow \citeA[4]{lu2011budgeted} in deriving pseudo-utilities from readers' preference orders. For present purposes we used the Borda score, that is $u_i$ outputs the value $m-1$ for consumer $i$'s top item, $m-2$ for the second one and so forth - however, nothing hinges on this choice.
+Depending on the context, the cost could be interpreted as the time it takes to read an article,
 the cognitive resources it takes a consumer to digest it or simply character length.
- Finally, as these resources are limited we assume a \emph {budget} $B\in \mathbb{R}_{\geq 0}$.
+ Finally, as these resources are limited we assume a \emph {budget} $B\in \mathbb{N}_{\geq 0}$.
+%Nothing hinges on the choices we made with respect to utility and cost and many different approaches are possible.
+%Future work might consider different cost and utility distributions or interdependence of cost and utility functions. E.g. an introductory article might lower the cost of reading a more indepth piece or an article might have a high utility as part of a series but be worthless on its own.
 
-The recommendation rule then is a function from profiles, costs and the budget to recommended items: $F:\mathcal{L}^n\times \mathbb{N}^{|A|}\times \mathbb{R}_{\geq 0} \rightarrow 2^A$.
+The recommendation rule then is a function from profiles, costs and the budget to recommended items: $F:\mathcal{L}^n\times \mathbb{N}^{|A|}\times \mathbb{N}_{\geq 0} \rightarrow 2^A$.
 
-\section{Desirables \& Dimensions of Performance}%\hypertarget{axioms}
-
-{\bf Hideous intro. Clean it up} The following are a bunch of things we would like a recommendation mechanism to do.
-We will describe these desiderata formally and describe their relation and relevance to our goal stated in the introduction.
+\hypertarget{axioms}{\section{Axioms and Desirable Properties \& Dimensions of Performance}}%\hypertarget{axioms}
+We now describe a series of binary properties - {\em axioms} - and continuous {\em metrics of performance} a recommendation set should fulfill.
 
 \subsection{Axioms}
 
 We adapted most of the axioms suggested by \citeA{Elkind2017} for the k-multiwinner case to our budgeted setting:
 
 \begin{itemize}
-	\item \textbf{Non-Imposition:} For any set of alternatives $A$ and any  $W\subseteq A$ such that $C(W) \leq B$ there is a profile $V$ such that $F(V, k)=W$ \textcolor{red}{Alternatively: For any set of alternatives $A$ and any  $W\subseteq A$ such that $C(W) = B$ there is a profile $V$ such that $F(V, k)=W$. In this case this axiom should be satisfied by all our rules.}
-	\item \textbf{Consistency:} Given two profiles $\mathcal{R}_1$ and $\mathcal{R}_2$, a budget B and a voting rule $F$, $F$ satisfies \emph{consistency} if whenever $F(\mathcal{R}_1, B)\cap F(\mathcal{R}_2, B )\neq \emptyset$ then $F(\mathcal{R}_1, B)\cap F(\mathcal{R}_2, B)\subseteq F(V_1+V_2, B)$.
-	\item \textbf{Homogeneity:} For any profile $\mathcal{R}$ and any $n \in \mathbb{N}$: $F(n*\mathcal{R}, B)=F(\mathcal{R}, B)$
+	\item \textbf{Non-Imposition:} For any set of alternatives $A$ and any  $W\subseteq A$ such that $C(W) = B$ there is a profile $\mathcal{R}$ such that $F(\mathcal{R}, C(A), B)=W$.
+	\item \textbf{Consistency:} Given two profiles $\mathcal{R}_1$ and $\mathcal{R}_2$, a budget B and a voting rule $F$, $F$ satisfies \emph{consistency} if whenever $F(\mathcal{R}_1, B)\cap F(\mathcal{R}_2, B )\neq \emptyset$ then $F(\mathcal{R}_1, B)\cap F(\mathcal{R}_2, B)\subseteq F(\mathcal{R}_1+\mathcal{R}_2, B)$.
+	\item \textbf{Homogeneity:} For any profile $\mathcal{R}$ and any $n \in \mathbb{N}$: $F(n\mathcal{R}, B)=F(\mathcal{R}, B)$
 	\item \textbf{Monotonicity:} Given any profile $\mathcal{R}$ and any $a \in A$ such that $a \in W$, where $W \in F(\mathcal{R}, B)$, for any profile $\mathcal{R'}$ obtained from $\mathcal{R}$ by raising $a$ by one position in one voter's preference order we have: (1) $a \in W'$, where $W' \in F(\mathcal{R'}, B)$ and (2) if $a$ was directly below an option $b \notin W$. then $W \in F(\mathcal{R'}, B)$
 
 	\item \textbf{Committee-Monotonicity:} For any profile $\mathcal{R}$, $W \in F(\mathcal{R}, B)$ and $\epsilon\in\mathbb{R}$ there is a set $W'$ such that $W' \in F(\mathcal{R}, B + \epsilon)$ and $W \subseteq W'$.
 
 	%\item Consensus Committee
 	%\item Fixed Majority(cf. $\sigma$-Minority-Consistency)
-	\item \textbf{Unanimity:} For any profile $\mathcal{R}$ : if all consumers $n \in N$ rank the same set of options $W$ such that $C(W) = B$ on top, then $W \in F(\mathcal{R}, B)$. \textcolor{red}{Note my change here from the version in the axioms file. I think we agreed on equality, right?}
+	\item \textbf{Unanimity:} For any profile $\mathcal{R}$ : if all consumers $n \in N$ rank the same set of options $W$ such that $C(W) = B$ on top, then $W \in F(\mathcal{R}, B)$. %\textcolor{red}{Note my change here from the version in the axioms file. I think we agreed on equality, right?}
 
 \end{itemize}
 %Is the following paragraph really interesting as it stands? Should we not just say what did take from Elkind and leave unmentioned what we considered uninteresting?
-We decided not to consider the axioms \emph{Consensus Committee} and \emph{Solid Coalitions} since they have no clear equivalent in the budgeted setting. However, the axiom of General Threshold Consistency described in the next section has a similar purpose. Likewise, we decided to replace the axiom \emph{Fixed Majority} by the Majority Support (MS) axiom described in the next section. The reason is that almost all rules \citeA{Elkind2017} consider in the k-multiwinner setting fail to satisfy Fixed Majority. We therefore suspected that we would obtain a simmilar result and deemed it more interesting to assess a criterion of Condorcet consistency that comes in degrees. In addition, MS enables an easy implementation of a  recommendation rule corresponding to it in a way described in \hyperlink{rules}{Section  4}. Doing the same for a budgeted version of the Fixed Majority axiom, possibly through a suitable adaptation of the Bloc-Rule, remains a challenge for future work.
+We decided not to consider the axioms \emph{Consensus Committee} and \emph{Solid Coalitions} since they have no clear equivalent in the budgeted setting. Likewise, we decided to drop the \emph{Fixed Majority} axiom because almost all rules \citeA{Elkind2017} consider in the k-multiwinner setting fail to satisfy Fixed Majority. We, therefore, suspected that we would obtain a similar result and deemed it more interesting to assess a criterion of Condorcet consistency that comes in degrees.
+The purpose of these axioms is to some extent covered by the General Threshold (GT) and Majority Support (MS) axioms described in the next section. In addition, they enable easy implementation of a  recommendation rules corresponding to them in a way described in \hyperlink{rules}{Section  4}. %Doing the same for a budgeted version of the Fixed Majority axiom, possibly through a suitable adaptation of the Bloc-Rule, remains a challenge for future work.
 
-\subsection{Desirables}
-\subsubsection{Utility Maximization}
 
-Let $\mathcal {W_B}$ be the set of all elements of $\mathcal{P}(A)$ s.t. $C(W)\leq B$. A recommendation set $W$ satisfies budgeted Utility Maximization (UM) iff:
+%Likewise, we decided to replace the axiom \emph{Fixed Majority} by a Majority Support (MS) axiom.  The reason is that almost all rules \citeA{Elkind2017} consider in the k-multiwinner setting fail to satisfy Fixed Majority. We therefore suspected that we would obtain a similar result and deemed it more interesting to assess a criterion of Condorcet consistency that comes in degrees. In addition, MS enables an easy implementation of a  recommendation rule corresponding to it in a way described in \hyperlink{rules}{Section  4}. Doing the same for a budgeted version of the Fixed Majority axiom, possibly through a suitable adaptation of the Bloc-Rule, remains a challenge for future work.
+
+\subsection{Metrics of Performance}
+
+In addition to the binary axioms, we designed three continuous metrics of performance specifically adjusted to our setting.
+
+\subsubsection{Utility Maximization (AUM)}
+
+Let $\mathcal {W_B}$ be the set of all elements of $\mathcal{P}(A)$ s.t. $C(W)\leq B$. A recommendation set $W$ satisfies the axiom of budgeted Utility Maximization (AUM) iff:
 
 \[
 W=\argmax_{W'\in \mathcal{W}_B}(u(W'))
 \]
 
+The motivation behind this property is that, arguably, a recommendation set should get consumers the highest possible payoff. Even if it does not, it is of interest to assess how far away it is from the optimum.
 
-\subsubsection{General Threshold}
+\subsubsection{General Threshold (GT)}
 
-Let $N_{a\succ b}$ denote the set of all consumers who rank $a$ over $b$. $\theta$ is called a general threshold for a recommendation set $W$ if \[a\in W\text{ whenever }\frac {|N_{a\succ b}|}{|N|}\geq \theta \text{ for all } b\in A\setminus \{a\} \]
+Let $N_{a\succ b}$ denote the set of all consumers who rank $a$ over $b$. $\theta$ is called a general threshold (GT) for a recommendation set $W$ if \[a\in W\text{ whenever }\frac {|N_{a\succ b}|}{|N|}\geq \theta \text{ for all } b\in A\setminus \{a\} \]
 
-A recommendation set is $\theta$-consistent if $\theta$ is a general threshold for $W$.
+A recommendation set is $\theta$-consistent if $\theta$ is a GT for $W$.
 
-\subsubsection{Majority Support}
+The intuition here is that a low GT allows consumers to predictably push items ``on the agenda'' by gathering a \emph{sufficiently large coalition} that rank those items high.
 
-Note that the number of pairwise majority contests for a given news item is $|N|-1$. Then $\sigma$ is called a majority support threshold for a recommendation set $W$ if \[a\in W \text{ whenever }\frac {|\{b:\frac{|N_{a\succ b}|}{|N|}>\frac{1}{2}\}|}{|N|-1}\geq \sigma \text{ for all } b\in A\setminus{a}\]
+\subsubsection{Majority Support (MS)}
 
-A recommendation set is $\sigma$-consistent if $\sigma$ is a majority support threshold for $W$.
+Note that the number of pairwise majority contests for a given news item is $|N|-1$. Then $\sigma$ is called a majority support (MS) threshold for a recommendation set $W$ if \[a\in W \text{ whenever }\frac {|\{b:\frac{|N_{a\succ b}|}{|N|}>\frac{1}{2}\}|}{|N|-1}\geq \sigma \text{ for all } b\in A\setminus{a}\]
 
-Note that the last two axioms are extensions of the Condorcet consistency axiom for the multiwinner case: Both axioms require that the Condorcet winner, if it exists, is in the winning set. %This is repeated elsewhere. I believe in the rule section.
+A recommendation set is $\sigma$-consistent if $\sigma$ is a MS threshold for $W$.
 
-\subsubsection{Gini-Coefficient}
+In contrast to GT, a low MS threshold allows consumers to kick items off the agenda by establishing a \emph {majority coalition} that ranks those items low.
+
+Note that the last two properties are extensions of the Condorcet consistency axiom for the multiwinner case: Both axioms require that the Condorcet winner, if it exists, is in the winning set.
+
+\subsubsection{Gini-Coefficient (GINI)}
 
 Define the Gini-Coefficient (GINI) of a recommendation set as follows:
 
 \[G(W)=\frac{\displaystyle{\sum_{i=1}^n \sum_{j=1}^n \left| u_i - u_j \right|}}{\displaystyle{2n u(W)}}\]
 
-For $\delta\in [0,1]$, a recommendation set is $\delta$-egalitarian if $G(W)\leq \delta$.
+We care about GINI since unequal distributions of utility increase the likelihood that the worst-off consumers lose interest which would defeat the point of a common recommendation set.
 
-\section{Recommendation Rules}\hypertarget{rules}
+\hypertarget{rules}{\section{Recommendation Rules}}
 %Referencing ~\shortcite{Elkind2015} in text. Speaking about work ~\cite{Elkind2015}.
-In this section we define five voting rules, three extensions of multiwinner voting rules and introduce two new voting rules. The novel rules, Lowest General Budget-compatible Threshold Rule and the Budgeted Utility Maximization are meant to perform optimally on the AUM and GT desiderata, respectively.
+In this section, we define three extensions of k-multiwinner voting rules and introduce two new voting rules designed to perform optimally on the AUM and GT desiderata, respectively.
 
 \subsection{Extending Multiwinner Rules}
 
-We chose to adapt three k-multiwinner voting rules for our setting: A budgeted plurality rule as a baseline, a budgeted Borda rule as a more sophisticated representative of the positional scoring rules and a budgeted Copeland rule to represent the Condorcet extensions. All of these rules assign a score to each item based on the current profile: $S:\mathcal{L}^n\times F \times A \rightarrow \mathbb{R}$; we will denote an item's score, given a profile and a a rule, as $S(a)$, instead of $S(\mathcal{R}, F, a)$ for brevity below. Using the Plurality-, Copeland- or Borda-Score to assign scores to each item, we then recommended items employing \emph{fit by score}.
+We chose to adapt three k-multiwinner voting rules proposed by \citeA{Elkind2017} for our setting: A budgeted Plurality rule (BuPLU) as a baseline, a budgeted Borda rule (BuBOR) as a more sophisticated representative of the positional scoring rules and a budgeted Copeland rule (BuCOP) to represent the Condorcet extensions. All of these rules assign a score to each item based on the current profile: $S:\mathcal{L}^n\times F \times A \rightarrow \mathbb{R}$; for brevity we will henceforth refer to all rules that assign a score by \emph{fit-by-score rules} and denote an item's score, given a profile and a rule, as $S(a)$, instead of $S(\mathcal{R}, F, a)$.
 
-The \emph{fit by score} method starts with the complete budget, $B$, and all items ordered by their score. It then continuously fills $W$ with the next remaining item in the score-ranking that still fits the budget. More formally, we define recursively:
+The \emph{fit-by-score rules} use their respective scores to recommend items in the following way: Start with the complete budget $B$ and put the highest scoring budget-fitting items in the recommendation set. Then do the same for the remaining budget. Continue until the budget is filled. More formally, we define recursively:
 
 \[W_1=\{\argmax_{a\in A}S(a)\}\cap \mathcal{W}_B\]
 \[W_k=W_{k-1}\cup (\{\argmax_{a\in A\setminus W_{k-1}}S(a)\}\cap \mathcal{W}_{B-C(W_{k-1})})\]
 Then the recommended set is:
-\[F(\mathcal{R},B)=W_{k=|A|}\]
+\[F(\mathcal{R},C(A),B)=W_{k=|A|}\]
 
 \subsection{Rules Designed for Optimal Performance}
-It is noteworthy that \emph{fit by score} combined with the Copeland-Score performs optimally with respect to \textbf{what we call this again?} majority support consistency. That is, it elects the winning set with the lowest possible majority support threshold $\sigma$. Similarly, we can design rules to perform optimally with respect to Utility Maximization and General Threshold Consistency.
+It is noteworthy that \emph{fit-by-score} combined with the Copeland-Score performs optimally with respect to MS. It elects the winning set with the lowest possible MS threshold $\sigma$. Intuitively, this means that it enables majority coalitions to kick an item off the agenda even if they dislike that item only a bit.
+Similarly, we designed rules to perform optimally with respect to AUM and GT.
 
-\subsubsection{Lowest General Budget-compatible Threshold}
-The first such rule is the \emph{Lowest General Budget-compatible Threshold Rule} (LGBT). LGBT is designed to yield optimal results with respect to $\theta$-Minority Consistency. To achieve this, we start by defining an item's $\theta$-Score as follows:
+\subsubsection{Lowest General Budget-compatible Threshold (LGBT)}
+The first such rule is the \emph{Lowest General Budget-compatible Threshold Rule} (LGBT). LGBT is designed to yield optimal results with respect to GT. To achieve this, we start by defining an item's $\theta$-Score as follows:
 \[\theta(a)=\min_{b\in A \setminus {\{a\}}} \frac{|N_{a\succ b}|}{|N|}\]
 
-Then we apply the \emph{fit by score} method defined above to elect the recommended set. LGBT elects items in order of descending $\theta$-Score, given that adding an item does not violate the budget constraint.
+Then LGBT applies the \emph{fit-by-score} method to elect the recommended set.
 
-LGBT recommends the set that is optimal for minority preferences in the following sense:
+LGBT recommends the set that is optimal for minority preferences in the sense that it chooses the recommendation set with the lowest possible general threshold, thus enabling comparatively small coalitions to push ``their'' issues onto the agenda. For this it is sufficient but not necessary that a plurality of $\theta|N|$ voters rank the desired item first.
 
-\begin{itemize}
-\item \textbf{Consistency:} Whenever a budget-compatible news item is above the $\theta$-threshold, it is certainly recommended.
-\item \textbf{Minimality:} Subject to the consistency requirement, the lowest possible $\theta$-threshold is chosen.
-\item \textbf{Budget-Optimality:} Once the two preceding conditions have been met, the items with the next highest $\theta$ scores are added until the budget is filled.
-\end{itemize}
-
-If there is a Condorcet winner, LGBT automatically has the highest $\theta$-score of all news items. Hence, if it fits the budget, the Condorcet winner is always recommended.
-Furthermore, a Plurality winner which wins a fraction of $\theta$ of all votes is automatically in the recommended set.
-
-\subsubsection{Budgeted Utility Optimization}
-The second novel recommendation rule is the \emph{Budgeted Utility Optimization} (BUM). BUM is designed to perfom optimally with respect to UM as introduced above. It selects that set of articles which has the greatest overall utility for the consumers while fitting the budget.
+\subsubsection{Budgeted Utility Optimization (BUM)}
+The second novel recommendation rule is the \emph{Budgeted Utility Optimization} (BUM). BUM is designed to perform optimally with respect to AUM. It selects that set of articles which has the greatest overall utility for the consumers while fitting the budget.
 \[
-F(\mathcal{R},B)=\argmax_{W\in\mathcal{ W_B}} u(W)
+F(\mathcal{R},C(A),B)=\argmax_{W\in\mathcal{ W_B}} u(W)
 \]
 
-Although computing the BUM recommendation is an NP-hard problem because it corresponds to the {\em 0-1 Knapsack} problem, there exist algorithms to solve it in pseudo-polynomial time. We used such an algorithm for our simulations.
-\section{Proofs}%\hypertarget{proofs}
-As a first step in assessing the performance of our rules, we obtained results regarding axiom satisfaction by way of proof. \textbf{Hyperlink} Table 1 shows which recommendation rules satisfy a given axiom. For lack of space, we only provide one exemplary proof for each axiom.
+Although computing the BUM recommendation is an NP-hard problem because it corresponds to the {\em 0-1 Knapsack Problem}, there exist algorithms to solve it in pseudo-polynomial time. We used such an algorithm for our simulations.
+
+\hypertarget{proofs}{\section{Proofs}}%\hypertarget{proofs}
+As a first step in assessing the performance of our rules, we obtained results regarding axiom satisfaction by way of proof. We only present proof sketches here.
+%Table \ref{table1} shows which recommendation rules satisfy a given axiom.
 
 \begin{mytheorem}
-BUM satisfies Non-imposition
+All rules satisfy Non-Imposition
 \end{mytheorem}
-\begin{proof}
-Let $W$ be any set s.t. $C(W)=B$. Then there is some profile $\mathcal{R}_B$ s.t. $W$ is ranked on top by all readers. But then $\sum_{w\in W}u(w)>\sum_{w'\in W'}u(w')$ for all W' s.t. $c(W')\leq B$ and hence $W$ is the winner set under BUM. For the other rules examples can be constructed in similarly.
+\begin{proof}\renewcommand{\qedsymbol}{}
+Immediate. For any set within the budget limit consider elections with no other options. %Let $W$ be any set s.t. $C(W)=B$. Then there is some profile $\mathcal{R}_B$ s.t. $W$ is ranked on top by all readers. But then $\sum_{w\in W}u(w)>\sum_{w'\in W'}u(w')$ for all W' s.t. $c(W')\leq B$ and hence $W$ is the winner set under BUM. For the other rules similar examples can be constructed.
 \end{proof}
 
-\textcolor{red}{Remark: This is for the red colored version of the non-imposition axiom.}
+%\textcolor{red}{Remark: This is for the red colored version of the non-imposition axiom.}
 
 \begin{mytheorem}
-All considered rules satisfy the Consistency
+All considered rules satisfy Consistency
 \end{mytheorem}
 
-\begin{proof}
-Budget plurality rule:  Take any pair of profiles of consumers $V_1$, $V_2$ and a budget $B$ such that $F(V_1) \cap F(V_2) \neq \emptyset$. Then there is a set $W$ which is a winner for both of the profiles. But this means that members of $W$ received  higher plurality score than all other options in both of the profiles. So  they will also receive it in the profile $V_1 + V_2$. So $W$ also a winner in this profile.
-
-Proofs for other rules are symmetric.
+\begin{proof}\renewcommand{\qedsymbol}{}
+Omitted % Budget Plurality Rule:  Take any pair of profiles of consumers $\mathcal{R}_1$, $\mathcal{R}_2$ and a budget $B$ such that $F(\mathcal{R}_1, C(A), B) \cap F(\mathcal{R}_2, C(A), B) \neq \emptyset$. Then there is a set $W$ which is a winner for both of the profiles. But this means that members of $W$ received  higher plurality score than all other options in both of the profiles. So they will also receive it in the profile $\mathcal{R}_1 + \mathcal{R}_2$. So $W$ also a winner in this profile.
+%Proofs for other rules are symmetric.
 \end{proof}
 \begin{mytheorem}
 All considered rules satisfy Homogeneity
 \end{mytheorem}
-\begin{proof}
+\begin{proof}\renewcommand{\qedsymbol}{}
 
-Consider any profile $\mathcal{R}$ and a budget $B$. Then notice that in an election with $t$ copies of $\mathcal{R}$ the hierarchy of plurality and Borda scores is not changed, as change in the scores is then proportional. Therefore, the winners of BP and BB rules are preserved. As utilities are captured in terms of Borda scores, the winner of BUM rule is also preserved. Also, the results of pairwise majority contests are preserved, as for any pair of items $x, y$  the number of consumers who prefer $x$ to $y$ is multiplied by the same constant as those with opposite preferences. So LGBT and BC rules preserve the winner.
+Consider any profile $\mathcal{R}$ and a budget $B$. Notice that in an election with $t$ copies of $\mathcal{R}$ the hierarchy of Plurality- and Borda-Scores is not changed, as change in the scores is then proportional. Therefore, the winners of BuPLU and BuBOR rules are preserved. As utilities are captured in terms of Borda-Scores, the winner of BUM rule is also preserved. Also, the results of pairwise majority contests are preserved, as for any pair of items $x, y$  the number of consumers who prefer $x$ to $y$ is multiplied by the same constant as those with opposite preferences. So LGBT and BuCOP rules preserve the winner.
 %begin{enumerate}
 %\item Utility Maximization:
 %Consider any set of consumers $V$ and a budget $B$. Consider a ranking of subsets of options satisfying $B$ based on their generated utility:
@@ -264,179 +282,165 @@ Consider any profile $\mathcal{R}$ and a budget $B$. Then notice that in an elec
 \begin{mytheorem}
 All considered rules satisfy Monotonicity
 \end{mytheorem}
-\begin{proof}
+\begin{proof}\renewcommand{\qedsymbol}{}
 %Consider a profile $\mathcal{R}$, a cost function $C$ and a budget $B$. Let $F$ be the BUM rule and let $W\in F(R,B)$. Consider an alternative $c\in W$ and some $a\in A$ and consumer $i\in N$  s.t. $a\succ_i c$ and $a,c$ are immediate neighbours on $i$'s ballot. Denote by $\mathcal{R}'$ the profile that coincides with $\mathcal{R}$ except that $c\succ_i a$ and $a,c$ are immediate neighbours on $i$'s ballot
+We need to proof two claims presented in the Monitonicty axiom. We proceed by using defined $\mathcal{R}$, $\mathcal{R}'$ as in the axiom. For BUM, denote by $u_\mathcal{R}, u_{\mathcal{R}'}$ respectively the utility functions corresponding to $\mathcal{R}$, $\mathcal{R}'$. Let $a\in W$ and $b$ be a's above neighbor in some consumer i's ranking.
 
-\begin{enumerate}
-\item (BUM)
-Denote by $u_\mathcal{R}, u_{\mathcal{R}'}$ respectively the utility functions corresponding to these profiles.
+For the first claim note that either $a,b \in W$ (I) or $b\notin W$ (II). For (II) the desired result is immediate. For (I), note that $u_{\mathcal{R}'}(\{a,b\})=u_{\mathcal{R}}(\{a,b\})$. In addition if $b\in W'$ then a fortiori $a\in W'$. Hence suppose that $a,b\notin W'$. Then, since $W'$ is utility maximizing, there must be some set of alternatives $X\subseteq A\setminus W$ s.t. $C(X)\leq C(\{a,b\})$ and $u_{\mathcal{R}'}(W\setminus\{a,b\}\cup X)>u_{\mathcal {R}'}(W)$. Equivalently \[u_{\mathcal{R}'}(W)-u_{\mathcal{R}'}(\{a,b\})+u_{\mathcal{R}'}(X)>u_{\mathcal{R}'}(W)\]
 
-%Then we claim that
-%\begin{enumerate}
-%\item $c\in W'$
-%\item $W\in F(\mathcal{R}',B)$ if $a\notin W$
-%\end{enumerate}
+But none of these utilities have changed between $\mathcal{R}$ and ${\mathcal{R}'}$ and thus \[u_\mathcal{R}(W)-u_\mathcal{R}(\{a,b\})+u_\mathcal{R}(X)>u_\mathcal{R}(W)\]
 
-For (1) note that either $c,a \in W$ (I) or $a\notin W$ (II). For (II) the desired result is immediate. For (I), note that from the way we defined $\mathcal{R}'$ by a mere swap it follows that $u_{\mathcal{R}'}(\{a,c\})=u_{\mathcal{R}}(\{a,c\})$. Note in addition that if $a\in W'$ then a fortiori $c\in W'$ since $u_{\mathcal{R}'}(b)=u_\mathcal{R}(b)$ for all $b\in W\setminus \{a,b\}$. Hence suppose that $a,c\notin W'$. Then, since $W'$ is utility maximizing, there must be some set of alternatives $X\subseteq A\setminus W$ s.t. $C(X)\leq C(\{a,c\})$ and $u_{\mathcal{R}'}(W\setminus)\{a,c\}\cup X)>u(W)$. Equivalently \[u_{\mathcal{R}'}(W)-u_{\mathcal{R}'}(\{a,c\})+u_{\mathcal{R}'}(X)>u_{\mathcal{R}'}(W)\] But $u_{\mathcal{R}'}(W)=u_{\mathcal{R}}(W)$ since $u_{\mathcal{R}'}(\{a,c\})=u_\mathcal{R}(\{a,c\})$ and $u_{\mathcal{R}'}(w)=u_\mathcal{R}(w)$ for all $w\in W\setminus \{a,c\}$. And $u_{\mathcal{R}'}(X)=u_\mathcal{R}(X)$ since nothing outside $W$ was changed. Hence \[u_\mathcal{R}(W)-u_\mathcal{R}(\{a,c\})+u_\mathcal{R}(X)>u_\mathcal{R}(W)\] But then $W$ is not utility maximising given $B$ - a contradiction.
+But then $W$ is not utility maximizing given $B$ - a contradiction. We omit the proof for the latter claim.
 
-For (2), suppose $b\notin W$. Since $W$ is utility maximizing given $B$, for any $d\notin W$ and any $S$ s.t. $d\in S$ and $C(S)\leq  B$, either $u_R(S)\leq u_R(W)$ (I) or $C_R(S)>C_R(W)$ (II). For (I), since $u_{R'}(S) \leq  u_{R}(S)+ u_{R'}(a)- u_{R}(a)= u_{R'}(W)$ by utility maximization of $W$ and since the same tie-breaking applies, $W\in F(R',B)$. For (II), since $C$ is unchanged, the desired result is immediate.
+%For (2), suppose $b\notin W$. Since $W$ is utility maximizing given $B$, for any $d\notin W$ and any $S$ s.t. $d\in S$ and $C(S)\leq  B$, either $u_R(S)\leq u_R(W)$ (I) or $C_R(S)>C_R(W)$ (II). For (I), since $u_{R'}(S) \leq  u_{R}(S)+ u_{R'}(a)- u_{R}(a)= u_{R'}(W)$ by utility maximization of $W$ and since the same tie-breaking applies, $W\in F(R',B)$. For (II), since $C$ is unchanged, the desired result is immediate.
 
-\item (Scoring Rules): (1) Suppose for contradiction that $a\notin W'$. Since $S'(c)=S(c)$ for all $c\in A\setminus\{a,b\}$, $S'(a)\geq S(c)$ for all $c$ s.t. $C(c)\leq C(a)$. For any c s.t. $C(c)\geq C(a)$,
-
-Then there must be $c\in W'$ s.t. $S'(c)\geq S'(a)$ and $C(c)\leq C(a)$. But since $S'(c)=S(c)$ and $S'(a)\geq S(a)$, $S(c)\geq S(a)$. But then $c\in W$ and hence $a\notin W$ - a contradiction.
-
-\item (Budgeted Plurality)
-Note that if $c$ is put before $a$ it can only gain plurality points. Therefore, it will not be lowered in the plurality ranking. So, it will be elected in the new profile ($c \in W'$). Further, if $a \notin W$, no element of $W$ will lose plurality points, so they will all remain elected. So $W \in F(V,B)$.
-\item (Budgeted Borda)
-Again, in the shifted profile $c$ will be able to receive more points and it cannot lose any. So it will remain elected $c \in W'$. Also, if $a \notin W$, no element of $W$ will lose any Borda points and no option outside of $W$ will be granted any points. So all options in $W$ will remain elected. So $W \in F(V',B)$.
-\item (Copeland Rule)
-Note that in the new profile $c$ will have a chance of winning one more majority contest and it for sure will not lose any more than in the original one. So it will remain elected ($c \in W'$). Also, if $a \notin W$, no element of $W$ will lose more contests than in the previous profile. Also, options outside of $W$ might only lose more majority contests in comparison with the original profile. So all members of $W$ will be elected in the new profile. So $W \in F(V',B)$
-
-\end{enumerate}
-
+For the fit-by-score rules: Denote by $S$, $S'$ respectively the scoring functions corresponding to the profiles $\mathcal{R}, \mathcal{R'}$. (1) Since $S'(b)=S(b)$ for all $b\in A\setminus\{a,b\}$, $S'(a)\geq S'(b)$ for all $b$ s.t. $C(b)\leq C(a)$. For any $b$ s.t. $C(b)>C(a)$, either $S'(a)\geq S'(b)$ or $b\notin W'$ since it can not be fit into the budget by the fit and score method. But then $a\in W'$ as desired. We omit (2)
 \end{proof}
 \begin{mytheorem}
 No budgeted voting rule satisfies Committee-Monotonicity
 \end{mytheorem}
 
-\begin{proof}
-Consider an election with one voter and two options. The only preference order is:
-\begin{itemize}
-\item $x_1 > x_2$
-\end{itemize}
-and $cost(x_1) = 9$, $cost(x_2)=1$
-
-Note that if the budget is $8$, $x_2$ will be elected under any rule as only this item can fit into the budget. However, if the budget is extended to $9$, clearly $x_1$ will be elected under any considered rule. So Committee-Monotonicity is always violated.
+\begin{proof}\renewcommand{\qedsymbol}{}
+Consider a profile with only one consumer and two items. The only preference order is $(x_1 > x_2)$. Now suppose $C(x_1) = 9$, $C(x_2)=1$ and $B=8$. Then $x_2$ will be elected under any rule as only this item fits into the budget. However, if $B=9$, clearly $x_1$ will be elected under any considered rule. So Committee-Monotonicity is always violated.
 \end{proof}
 \begin{mytheorem}
-BUM and BP do not satisfy Unanimity
+BUM and BuPLU do not satisfy Unanimity
 \end{mytheorem}
-\begin{proof}
+\begin{proof}\renewcommand{\qedsymbol}{}\renewcommand{\qedsymbol}{}
 
-
-Consider elections with budget $B=10$, a set of items with corresponding costs $X= \{x_1:9, x_2:2, x_3:2, x_4:2, x_5:2\}$ and a following profile of users:
-\begin{itemize}
-\item 2 consumers: $x_1 > x_2 >x_3 > x_4 > x_5$
-\end{itemize}
- Notice that following the unanimity axiom $\{x_1 \}$ should be elected. This is the case because it fits into the budget, no other option can be added to this set not exceeding it and all consumers rank it on top. But it is not the set chosen neither by the utility maximization nor by $\theta$-minimization rule.
-
-\begin{enumerate}
-\item The set $\{x_2, x_3, x_4 x_5 \}$ also fits into the budget, but it clearly generates more utility than $\{ x_1\}$ (it gets 12 Borda points while $\{ x_1\}$ only gets 8). So it will rather be elected than $\{x_1 \}$.
-\item Notice that as $x_1$ wins against any other item in a pairwise contest, $\{x_1 \}$ is granted $\theta$ of 100 \%. Therefore, any other set satisfying the budget will have a lower $\theta$. So set $\{x_2, x_3, x_4 x_5 \}$ will rather be elected than $\{x_1 \}$.
-\end{enumerate}
+For BUM, consider elections with budget $B=10$, a set of items with corresponding costs $X= \{x_1:10, x_2:2, x_3:2, x_4:2, x_5:2\}$ and a profile of users with 2 consumers with the same preference orders ($x_1 > x_2 >x_3 > x_4 > x_5$).
+Notice that following the unanimity axiom $\{x_1 \}$ should be elected. But by summing up the (Borda-)utilities one can easily see that BUM elects $\{ x_2, x_3, x_4, x_5\}$.
+For BuPOL, consider the same examples with but now $C(x_1)=2$. Now $x_1$ is a plurality winner and the rest of the recommendation set will be filled by tie-breaking. But then $x_5$ might be recommended.
+%\begin{enumerate}
+%\item The set $\{x_2, x_3, x_4 x_5 \}$ also fits into the budget, but it clearly generates more utility than $\{ x_1\}$ (it gets 12 Borda points while $\{ x_1\}$ only gets 8). So it will rather be elected than $\{x_1 \}$.
+%\item Notice that as $x_1$ wins against any other item in a pairwise contest, $\{x_1 \}$ is granted $\theta$ of 100 \%. Therefore, any other set satisfying the budget will have a lower $\theta$. So set $\{x_2, x_3, x_4 x_5 \}$ will rather be elected than $\{x_1 \}$.
+%\end{enumerate}
 \end{proof}
 \begin{mytheorem}
 All other rules satisfy Unanimity
 \end{mytheorem}
 
-
-\begin{proof}
-
-\item For the BB rule consider an election $E$ with budget $B$ and a profile of consumers $V$ such that there is a set of options $W$ such that $W$ fits the budget maximally and $W$ is ranked as a top set by all consumers. Then it is easy to see that any $x \in W$ has more Borda points than any $x' \notin W$, so all $x \in W$ are strictly higher in the ranking than any $x' \notin W$. So all $x \in W$ are elected as they can all fit in the budget together and no other option is elected due to maximality. So $W$ is the winning set. For the BC rule notice that all options in $W$ win majority contests with all options from outside of it. So, options in $W$ have more Copeland points than other options, so $W$ is elected. The argument for LGBT is symmetric.
-
-
+\begin{proof}\renewcommand{\qedsymbol}{}
+Consider a profile $\mathcal{R}$ such that there is a set of options $W$ such that $W=B$ fits the budget maximally and $W$ is ranked as a top set by all consumers. Then it is easy to see that any $x \in W$ has more Borda points than any $x' \notin W$, so all $x \in W$ are ranked strictly higher than any $x' \notin W$. So all $x \in W$ are elected as they can all fit in the budget together and no other option is elected due to maximality. So $W$ is the winning set. For the BuCOP rule notice that all options in $W$ win majority contests against all options outside of it. So, options in $W$ have more Copeland points than other options, so $W$ is elected. The argument for LGBT is symmetric.
 \end{proof}
+%\begin{table}[h]
+%		%\centering
+%		\caption{Axiom Satisfaction}
+%		\label{table1}
+%		\scalebox{0.6}{ \begin{tabular}{|l|l|l|l|l|l|}
+%			\hline
+%			Axiom $\backslash$ Rule  & BP       & BB       & BC        & BUM       & LGBT \\ \hline
+%			Non-Imposition          $\textcolor{green}{\checkmark}$ & $\textcolor{green}{\checkmark}$ & $\textcolor{green}{\checkmark}$  & $\textcolor{green}{\checkmark}$  & $\textcolor{green}{\checkmark}$ \\ \hline
+%			Consistency            & $\textcolor{green}{\checkmark}$        & $\textcolor{green}{\checkmark}$        & $\textcolor{green}{\checkmark}$         & $\textcolor{green}{\checkmark}$         & $\textcolor{green}{\checkmark}$         \\ \hline
+%			Homogeneity        & $\textcolor{green}{\checkmark}$ & $\textcolor{green}{\checkmark}$ & $\textcolor{green}{\checkmark}$   & $\textcolor{green}{\checkmark}$ & $\textcolor{green}{\checkmark}$ \\ \hline
+%			Monotonicity     & $\textcolor{green}{\checkmark}$  & $\textcolor{green}{\checkmark}$  & $\textcolor{green}{\checkmark}$ & $\textcolor{green}{\checkmark}$   & $\textcolor{green}{\checkmark}$ \\ \hline
+%			Committee-Mon. & $\textcolor{red}{\times}$ & $\textcolor{red}{\times}$      & $\textcolor{red}{\times}$    & $\textcolor{red}{\times}$     & $\textcolor{red}{\times}$  \\ \hline
+%			Unanimity              & $\textcolor{red}{\times}$  & $\textcolor{green}{\checkmark}$  & $\textcolor{green}{\checkmark}$ & $\textcolor{red}{\times}$      & $\textcolor{green}{\checkmark}$ \\ \hline
+%		\end{tabular}}
+%	\end{table}
 
-\begin{table}[h!]
-		\centering
-		\caption{Axiom Satisfaction}
-		\label{my-label}
-		\begin{tabular}{|l|l|l|l|l|l|}
-			\hline
-			Axiom $\backslash$ Rule  & BP       & BB       & BC        & BUM       & LGBT \\ \hline
-			Non-Imposition         & $\textcolor{red}{\times}$ & $\textcolor{red}{\times}$ & $\textcolor{red}{\times}$  & $\textcolor{red}{\times}$  & $\textcolor{red}{\times}$ \\ \hline
-			Consistency            & $\textcolor{green}{\checkmark}$        & $\textcolor{green}{\checkmark}$        & $\textcolor{green}{\checkmark}$         & $\textcolor{green}{\checkmark}$         & $\textcolor{green}{\checkmark}$         \\ \hline
-			Homogeneity        & $\textcolor{green}{\checkmark}$ & $\textcolor{green}{\checkmark}$ & $\textcolor{green}{\checkmark}$   & $\textcolor{green}{\checkmark}$ & $\textcolor{green}{\checkmark}$ \\ \hline
-			Monotonicity     & $\textcolor{green}{\checkmark}$  & $\textcolor{green}{\checkmark}$  & $\textcolor{green}{\checkmark}$ & $\textcolor{green}{\checkmark}$   & $\textcolor{green}{\checkmark}$ \\ \hline
-			Committee-Mon. & $\textcolor{red}{\times}$ & $\textcolor{red}{\times}$      & $\textcolor{red}{\times}$    & $\textcolor{red}{\times}$     & $\textcolor{red}{\times}$  \\ \hline
-			Unanimity              & $\textcolor{red}{\times}$  & $\textcolor{green}{\checkmark}$  & $\textcolor{green}{\checkmark}$ & $\textcolor{red}{\times}$      & $\textcolor{green}{\checkmark}$ \\ \hline
-		\end{tabular}
-	\end{table}
-
-\section{Simulations}%\hypertarget{simulations}
-On top of the theoretical guarantees provided by the theorems, we investigated how the rules behave with respect to desirable properties for which there are no binary theoretical results.
+\hypertarget{simulations}{\section{Simulations}}%\hypertarget{simulations}
+On top of proving results for the axioms, we investigated how the rules behave with respect to the metrics of performance outlined earlier.
 \subsection{Method}
-We first generated a large number of profiles and then automatically checked the performance of rule-profile pairs with respect to the four desirable properties GT, AUM, MS and GINI.
+For this purpose, we first generated a large number of profiles and then automatically checked the performance of rule-profile pairs with respect to the four desirable properties GT, AUM, MS and GINI.
 
-To account for different types of consumer populations, we created six different profile-types, each representing a possible distribution of individual preferences over a population of 5000 consumers.
+To account for different types of consumer populations, we created seven different profile-types, each representing a possible distribution of individual preferences over a population of 5000 consumers. A profile-type consisted of noisy copies of a number of \emph{base preference}. We specified base preferences, copied them so as to get 5000 individual preferences and then applied noise to model variety amongst individual consumers. We employed a probabilistic model to swap items in the preferences, where farther swaps occurred with smaller probability than closer swaps. For all seven profile-types, we generated 100 profiles each for the cases of 10 and 20 news items.
 
-The first profile-type we generated were completely randomized preferences.
-The second profile-type consisted of noisy copies of one \emph{base preference}. That is, we randomly generated a preference, copied the preference 5000 times and then applied noise to model variety amongst individual consumers. We employed a probabilistic model to swap items in the preferences, where farther swaps occurred with smaller probability.
-The third profile-type consisted of two base preferences. We first provided two preference orders and then generated 2500 noisy copies of each of these two base preferences to form a profile. This resulted in a profile with two \emph{clusters} of fairly similar consumer groups whose orderings agree mostly, but not completely, amongst  themselves.
-The forth profile-type contained two base preferences which were noisy-polar-opposites (reversed orders), that is, we randomly generated a preference order, copied it 2500 times and made 2500 of the reverse order.
-The fifth profile-type was noisy-similar. We created one base preference, applied high noise to it and then generated 2500 noisy copies of both.
-The sixth and seventh profile-types, we generated profiles with majority and minority groups; for example, 80\% of the consumers - 4000 consumers - in one cluster and four times 5\% - 500 consumers each - in small minority clusters.
+In terms of the results presented below, the most important profile-types are the following two with two base preferences each:
+For the first, the two base preferences are simply noisy copies of a third underlying preference order. We randomly generated one preference, applied high noise to it twice to get two base preferences and then generated 2500 moderately noisy copies of both. This resulted in profiles with two \emph{clusters} of fairly similar consumer groups whose orderings agree mostly, but not completely, amongst themselves. We call them similar-cluster profiles.
+For the other profile-type with two base preferences, we randomly generated a preference order, made 2500 noisy copies of it, then flipped it upside down and generated 2500 noisy copies of the reverse order. We call these polarized-cluster profiles.
 
-For each profile-type we generated 100 profiles each for the cases of 10 and 20 news items.
-\subsubsection{Significance Tests}
-In order to determine whether the observed differences in performances between particular rules with respect to postulated properties the following data analysis has been performed:
-
-The scores of particular rules with respect to a property have been compared using the one-side ANOVA test. If the outcome of this test was significant a posthoc analysis was performed to determine the significance of pairwise differences between scores of rules. This task was dealt with with employment of the Tukey Honest Significance Test. This procedure was executed for all analyzed properties. All differences discussed later were shown to be significant on the confidence level $p= 0.01$ by the Tukey test.
+So, we generated a large number of profiles with 5000 consumers each that vary across two dimensions. They are either made up of preference orders over 10 or 20 items, and the consumers in the profiles are grouped in different types of \emph{clusters}, that is, closely scattered around an underlying base preference.
+ %\subsubsection{Significance Tests}
+%We determined whether the observed differences in performances between particular rules with respect to desirable properties are significant,
+%we employed the following test:
+%The average scores of particular rules with respect to a desirable property have been compared using the one-sided ANOVA test. If the outcome of this test was significant a posthoc analysis was performed to determine the significance of pairwise differences between average scores of rules. We used the {\em Tukey Honest Significance Test}.
 \subsection{Results}
-A quick recap of what we did: We generated a large number of profiles with 5000 consumers each that principally vary across two dimensions. They are either made up of preference orders over 10 or 20 items, and the consumers in the profiles are grouped in different types of \emph{clusters}, that is, closely scattered around an underlying base preference. We then studied how a) these profiles, all positioned somewhere on these two dimensions, affect performance on average with respect to our desired properties \emph{for all of our rules} and b) \textcolor{red}{how the rules perform against each other \emph{for all profiles}}. This allowed us to test for differences across different profiles for each rule, say, whether the number of candidates affects Utility Maximization under Budgeted Borda, or whether highly polarized voter populations tend to drive up the Gini-coefficient more for Copeland than for BUM.
-Our data analysis yielded a large number of results. We selected the four most interesting to present in the present contribution:
-\begin{enumerate}
-\item The first finding concerns the rules' performance on the Axiom of Utility Maximization. \textcolor{red}{Regarding a)}, for all profiles with 20 candidates and two clusters of consumers, the profiles with polarized-clusters performed between 5 to 10 percentage points worse on average against the similar-clusters populations.
-\textcolor{red}{With respect to b)} Both Borda and Plurality perform significantly worse than BUM on the 95\% confidence level. Perhaps surprisingly, while BC and LGBT failed to \emph{satisfy} the Utility Maximisation Axiom, the difference to BUM was not significant, indicating that BC and LGBT come close to optimal performance with respect to utility maximisation.
-\item The second finding pertains to General Threshold Consistency. \textcolor{red}{We obtain an a)-type result that} for both the 10 items case and the 20 items case with two clusters of consumers, the polarized-cluster profiles perform between 30 and 55 percentage points worse than the similar-cluster populations for all rules.
-We can conclude on a 95\% confidence level that LGBT performs significantly better with respect to General Threshold Consistency in similar-cluster populations than in polarized-cluster populations. Borda, Copeland and Plurality only do so in the profiles with 10 items.
-\item \textcolor{red}{An a)-type comparison of} the mean Gini-coefficient of all profiles with 20 items with the mean Gini-coefficient of all profiles with 10 items, yields that profiles with 20 candidates on average have a 15 and 22 percentage points higher Gini-coeffient than profiles with 10 candidates.
-Except for the BUM rule, all of these differences are significant on the 95\% confidence level.
-This means that for all but the BUM rule the Gini-coefficient is significantly higher with 20 items than with 10 items.
-\item
-\textcolor{red}{We also obtained a b)-type result for General Threshold Consistency:} Both for the populations with 10 and 20 items, the LGBT rule performs significantly better than the other rules on the 99\%-level. The difference is most pronounced of the BUM rule. For 10 items scores BUM on average 19.5 percentage points higher (worse) than LGBT. In the case of 20 items, the BUM rule scores on average 21.8 percentage points higher (worse) than LGBT.
-\item Also concerning comparable performance on the Gini-coefficient: For 20 and 10 items, respectively, BUM performs 3.8 and 10.6 percentage points worse than LGBT, with significance on the 99\% level.
+We then studied how a) different profiles, all positioned somewhere on these two dimensions, affect performance on average with respect to our desired properties \emph{for all of our rules} and b) how the rules perform against each other \emph{for all profiles}. This allowed us to test for differences across distinct profiles for each rule, say, whether the number of candidates affects AUM under the BuBOR, or whether highly polarized voter populations tend to drive up the Gini-coefficient more for BuCOP than for BUM.
+Our data analysis yielded a large number of results. We present here the most interesting. To test the significance of the obtained results, we employed ANOVA in combination with the Tukey post hoc analysis.
+%\begin{figure}[!htb]
+ %   \centering
+  %  \begin{minipage}{.2\textwidth}
+   %     \centering
+    %    \includegraphics[width=0.3\linewidth, height=0.15\textheight]{gt_pol_20}
+     %   \caption{$dt=0.1$}
+      %  \label{fig:prob1_6_2}
+    %\end{minipage}%
+    %\begin{minipage}{0.2\textwidth}
+     %   \centering
+      %  \includegraphics[width=0.3\linewidth, height=0.15\textheight]{gt_sim_20}
+       % \caption{$dt =$}
+        %\label{fig:prob1_6_1}
+    %\end{minipage}
+%\end{figure}
 
-\item Another type b) result pertains to Majority Support Consistency. As expected, BC performed best with respect to this axiom and significantly so compared to all other rules on the 99\% interval. Less obviously, we also found that BB outperforms the remaining rules with a significance on the 99\% level. Thus, both BUM and LGBT only did approximately as well as the baseline BP rule with respect to Majority Support Consistency.
-\end{enumerate}
-\subsection{Discussion}
-
-The a)-type results indicate that polarization of the readership leads to both lower utility and higher lowest general thresholds indicating what one might call a \emph{cost of polarization}. This is bad news for hopes to find common recommendations for divided readerships. An avenue for future research could be the search for a recommendation rule that minimises the cost of polarization.
-
-We were somewhat puzzled by the increase in Gini-Coefficient correlated to an increase in the number of candidates. We attempted normalizing the utilities speculating that the much larger absolute difference in utility scores for 20-news-item-profiles vs  10-news-item-profiles might cause the effect. However, the result remained robust. Thus further research will be needed to get to the bottom of this.
-
-Regarding b)-type results, we can conclude that no single rule performs optimal with respect to all desirable properties and types of profiles. As expected we have a ``three-way-tie'' between BUM, LGBT and BC when it comes to Utility Maximisation, General Threshold Consistency and Majority Support Consistency. However, looking at the other properties, a tendency can be established:
-first it is notable that BUM is the only rule that fails the Unanimity axiom. Secondly, while the BUM rule performs optimally on the Axiom of Utility Maximization, we could not determine exactly how much worse the other rules perform. Although they must perform worse in expectation, the empirical difference is not significant on any relevant level indicating BC and LGBT come close to the optimum. A further point to make is that while LGBT and BC are tied with respect to Gini-coefficient, they clearly beat  BUM in this respect. To sum up: Although BUM maximizes utility by construction, it is unclear how much added utility this actually generates on average as compared to BC and LGBT. Moreover, this additional utility comes at the cost of failing unanimity, markedly unequal utility distribution amongst the consumers, higher lowest general thresholds and higher lowest majority support thresholds. All of this arguably indicates that BUM is overall a worse rule then BC and LGBT.
-
-In our specific case, we especially care about the Gini-coefficient since unequal distributions of utility increases the likelihood that the worst-off consumers defect which would defeat the point of a common recommendation set. Both the Condorcet Consistency extensions of General Threshold Consistency and  Majority Support Consistency may be useful depending on the context: a low general threshold allows consumers to predictably push items ``on the agenda'' by gathering a \emph{sufficiently large coalition} that rank those items high. On the other hand, a low Majority Support Consistency allows consumers to kick items off the agenda by establishing a \emph {majority coalition} that ranks those items low.
-
-Thus, depending on the setting, LGBT or BC may be preferable.
-
-%The most interesting contrast of rules takes place between LGBT and BUM. The LGBT rule performs much better with respect to General Threshold Consistency, as it is supposed to by construction. Yet, while the BUM rule performs optimally on the Axiom of Utility Maximization, we could not determine exactly how much worse the other rules perform. Although they must perform worse in expectation, the empirical difference is not significant on any relevant level. A further point to make is that LGBT clearly beats  BUM on the Gini-coefficient as well. To sum up: Although BUM maximizes utility by construction, it is unclear how much added utility this actually generates on average as compared to other rules. Moreover, this additional utility comes at the cost of markedly unequal utility distribution amongst the consumers and higher lowest general thresholds.
-
-
-%\begin{itemize}
-%\item No rule can be treated as optimal with respect to all desirable properties.
-%\item The BUM rule deals the best in terms of maximizing utilities on the global level.
-
-%\item LGBT rule deals much better in terms of $theta$-Minority Consistency and $\delta$-Equality which concern the equality of users.
-%\end{itemize}
-
-
-%\end{enumerate}
-\section{Conclusion}%\hypertarget{conclusion}
-
-\begin{enumerate}
-	\item \textbf{Overview:} We presented a formal Social Choice framework to give a recommendation of news items.
-	\item \textbf{Desirable Properties of Recommendation Sets:} We adjusted multiwinner axioms and devised further desirable criteria.
-	\item \textbf{Budgeted Voting Rules:} We devised new rules and extended three multiwinner voting rules.
-	\item \textbf{Methods:} We proved axiomatic results and ran simulations.
-	\item \textbf{Results:}
-\begin{itemize}
-\item There is a trade-off between maximizing utility and equal utility distribution.
-\item The LGBT-Rule favours minority groups, while BUM leads to maximal total utility.
-\item In polarized populations, minority groups tend to fare worse and maximal total utility is sub-optimal.
-\item More news-items tend to increase utility inequality.
-\item Future Work: Cost Distribution\\
-There are two polar extremes here:
-On one end one could conceive a rule that picks chunky, expensive items (long, in-depth articles);
- on the other end rules that pick snacky, cheap items (Vice).
- In principle, any distribution over article prices is conceivable.
- \item Future Work: Concerning \emph {u}, then, there are two fundamental positions one could take. On the one hand, one a \emph {utilitarian} view we could measure social welfare as the sum of each all consumers' individual value. On the other, one could also adopt some {\emph egalitarian} point of view which takes the differences between consumers' values into account.
-\end{itemize}
-\end{enumerate}
+\begin{figure}[h]
+\centering
+\label{fig:1}
+\begin{subfigure}%[b]{0.5\linewidth}
+  \centering
+  \includegraphics[width=.25\linewidth]{polarized}
+    \vspace{-1.8ex}
+%  \caption{Average GT, Polarized Profiles}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}%{0.5\textwidth}
+  \centering
+  \includegraphics[width=.25\linewidth]{similar}
+  \vspace{-2ex}
+ % \caption{Average GT, Similar Profiles}
+  \label{fig:sub2}
+  \end{subfigure}
+  \caption{From left to right the bars stand for BuPLU, BuBOR, BuCOP, BUM and LGBT. The left plot shows the average GT for polarized profiles. The right plot shows average GT for similar profiles.}
+\end{figure}
+%\caption{}
 
 
+\subsubsection{Results of Type a)}
+
+Firstly, concerning AUM, we found that for all profiles with 20 candidates and two clusters of consumers, the rules performed on average 5 to 10 percentage points worse on polarized-clusters populations than on similar-clusters populations.
+
+Secondly, with respect to GT and profiles with two clusters of consumers, all rules perform between 30 and 55 percentage points worse on the polarized-cluster populations than on the similar-cluster populations. This can be seen in Figure \ref{fig:1}.
+For LGBT, these differences were significant on a 95\% confidence level for both the 10 and 20 items case. For BuBOR, BuCOP and BuPLU they were only significant for the profiles with 10 items.
+%What about BUM here?
+
+
+%LGBT performs significantly better with respect to GT in similar-cluster populations than in polarized-cluster populations. BuBOR, BuCOP and BuPLU only do so in the profiles with 10 items.
+
+Finally, comparing the mean GINI of all profiles with 20 items with the mean GINI of all profiles with 10 items yields that profiles with 20 candidates on average have a 15 and 22 percentage points higher GINI than profiles with 10 candidates.
+Except for BUM, all of these differences are significant on the 95\% confidence level.
+
+The a)-type results indicate that polarization of the readership leads to both lower utility and higher GT indicating what one might call a \emph{cost of polarization}. This is bad news for hopes to find common recommendations for divided readerships. An avenue for future research could be the search for a recommendation rule that minimizes the cost of polarization.
+
+We were somewhat puzzled by the increase in GINI correlated to an increase in the number of candidates. We attempted normalizing the utilities speculating that the much larger absolute difference in utility scores for 20-news-item-profiles vs. 10-news-item-profiles might cause the effect. However, the result remained robust. Thus, further research will be needed to get to the bottom of this.
+
+\subsubsection{Results of Type b)}
+
+We found that both BuBOR and BuPLU perform significantly worse with respect to AUM than BUM on the 95\% confidence level. Perhaps surprisingly, while BuCOP and LGBT performed worse on AUM on average, the difference to BUM was not significant.
+
+With respect to GT, we found that for both for the populations with 10 and 20 items, the LGBT rule performs significantly better than the other rules on the 99\%-level. The difference is most pronounced of the BUM rule. For 10 items scores BUM on average 19.5 percentage points higher (worse) than LGBT. In the case of 20 items, BUM scores on average 21.8 percentage points higher (worse) than LGBT.
+
+For the GINI we found that for 20 and 10 items, respectively, BUM performs 3.8 and 10.6 percentage points worse than LGBT, with significance on the 99\% level. There were no significant differences between LGBT and the other score-and-fit rules.
+
+Another type b) result pertains to MS. As expected, BuCOP performed best with respect to this axiom and significantly so compared to all other rules on the 99\% interval. Less obviously, we also found that BuBOR outperforms the remaining rules with a significance on the 99\% level. Thus, both BUM and LGBT only did approximately as well as the baseline BuPLU rule with respect to MS.
+
+We conclude that no single rule performs optimally with respect to all desirable properties and types of profiles. As expected we have a ``three-way-tie'' between BUM, LGBT and BuCOP when it comes to AUM, GT and MS. However, looking at the other properties, a tendency can be established:
+First, it is notable that BUM is the only rule besides BuPLU that fails the Unanimity axiom. Secondly, while the BUM rule performs optimally on the AUM, the difference to BuCOP and LGBT was not significant which indicates that BuCOP and LGBT come close to the optimum. A further point to make is that while LGBT and BuCOP are tied with respect to GINI, they clearly beat BUM in this respect.
+
+To sum up: Although BUM maximizes utility by construction, this only leads to little-added utility compared to BuCOP and LGBT. Moreover, this additional utility comes at the cost of failing unanimity, markedly unequal utility distribution amongst the consumers, higher lowest GT and higher lowest MS thresholds. All of this arguably indicates that BUM is overall a worse rule than BuCOP and LGBT.
+
+\hypertarget{conclusion}{\section{Conclusion}}%\hypertarget{conclusion}
+%Information segregation in media can fraction a society on a factual basis, therefore it is important to have a way of creating factional basis so that these fractions have a basis of communication.
+
+In this paper, we presented a formal Social Choice framework to recommend a common core of news items to a (possibly diverse) group of consumers given a budget constraint. For this, we adjusted multiwinner axioms relevant to this setting and devised further performance measures which provide different ways to evaluate the recommended set. With these criteria in mind, we introduced five rules, two of them novel, designed to perform especially well. For all of the rules, we checked axiom satisfaction via proofs. Furthermore, we ran simulations in order to assess the rules against our performance measures.
+For the simulations we defined multiple population-types and for each type, we generated multiple profiles. We then applied our voting rules to the profiles and performed statistical analysis on the results.
+
+From our research we were able to draw two kinds of conclusions. Firstly, population structure greatly affects how well the rules perform. Notably, there is a \emph{cost of polarization} leading to less desirable outcomes in polarized societies. Secondly, the BUM rule only achieves marginal improvement in utility at the expense of performance on other measures. Thus we conclude that LGBT and BuCOP are the best rules in this setting known so far.
+
+
+%Our first conclusion is that there is a trade-off between maximizing utility and equal utility distribution, which indicates that one should not solely look at utility maximization when selecting a common core of news items since one does not want to aliente a part of the population but rather try to represent the population equally. The second, if the population is polarized, such that they share different preferences, it is hard for minority groups to push their agenda to the common core and the general utility of the recommended set will be sub-optimal. Therefore, it is very hard to create a common core of news items for a polarized population.
+
+%Our third conclusion is that the more selection available, the more the inequality is. This is mostly due to the budget constraint, as the users which get their highly ranked items into the recommended set are relatively more happier than the once which do not and this discrepancy increases with a greater selection.
 
 %% The file named.bst is a bibliography style file for BibTeX 0.99c
 \bibliographystyle{apacite}
